@@ -19,6 +19,7 @@ app.use('/api', require('./routes/auth'));
 app.use('/api/characters', require('./routes/characters'));
 app.use('/api/monsters', require('./routes/monsters'));
 app.use('/api/players', require('./routes/party'));
+app.use('/api/dice', require('./routes/dice'));
 app.use('/', require('./routes/pages'));
 
 const server = app.listen(PORT, '0.0.0.0', () => {

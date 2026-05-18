@@ -12,6 +12,7 @@
     <div class="nav-tabs">
       <a href="/" class="nav-tab">Home</a>
       <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/dice-roll" class="nav-tab">Dice Roll</a>
       <a href="/monsters" class="nav-tab active">Monsters</a>
     </div>
     <div class="nav-user">
@@ -30,6 +31,9 @@
         <button class="btn-new-char" onclick="createNewMonster()">+ New</button>
       </div>
       <ul class="char-list" id="monster-list"></ul>
+      <div class="cs-sidebar-footer">
+        <button class="btn-danger-sm" onclick="deleteAllMonsters()">Delete All Monsters</button>
+      </div>
     </aside>
 
     <!-- Monster detail area -->
@@ -96,6 +100,7 @@
     </section>
   </main>
 
+  <script src="/js/utils.js"></script>
   <script src="/js/monsters.js"></script>
 </body>
 </html>

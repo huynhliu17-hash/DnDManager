@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice Roll — DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Home</a>
+      <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/dice-roll" class="nav-tab active">Dice Roll</a>
+      <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="app-main">
+    <div class="dice-layout">
+
+      <!-- Roll panel -->
+      <div class="dice-panel">
+        <h2 class="dice-panel-title">Roll Dice</h2>
+
+        <div class="dice-section">
+          <label class="dice-label">Dice Type</label>
+          <div class="dice-type-group" id="dice-type-group">
+            <button class="dice-type-btn" data-type="d4">d4</button>
+            <button class="dice-type-btn" data-type="d6">d6</button>
+            <button class="dice-type-btn" data-type="d8">d8</button>
+            <button class="dice-type-btn" data-type="d10">d10</button>
+            <button class="dice-type-btn" data-type="d12">d12</button>
+            <button class="dice-type-btn active" data-type="d20">d20</button>
+            <button class="dice-type-btn" data-type="d100">d100</button>
+          </div>
+        </div>
+
+        <div class="dice-section">
+          <label class="dice-label" for="dice-count">Number of Dice</label>
+          <div class="dice-count-row">
+            <button class="dice-count-btn" id="count-dec" onclick="adjustCount(-1)">−</button>
+            <input type="number" id="dice-count" class="dice-count-input" value="1" min="1" max="20">
+            <button class="dice-count-btn" id="count-inc" onclick="adjustCount(1)">+</button>
+          </div>
+        </div>
+
+        <button class="btn-primary dice-roll-btn" id="roll-btn" onclick="rollDice()">Roll</button>
+
+        <div class="dice-result hidden" id="dice-result">
+          <div class="dice-result-expr" id="result-expr"></div>
+          <div class="dice-result-dice" id="result-dice"></div>
+          <div class="dice-result-total" id="result-total"></div>
+        </div>
+      </div>
+
+      <!-- History panel -->
+      <div class="dice-history-panel">
+        <div class="dice-history-header">
+          <h2 class="dice-panel-title">Recent Rolls</h2>
+          <button class="btn-refresh" id="refresh-btn" onclick="loadHistory()" title="Refresh">&#8635; Refresh</button>
+        </div>
+        <div class="dice-history-wrap">
+          <table class="dice-history-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Roll</th>
+                <th>Results</th>
+                <th>Total</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr><td colspan="5" class="history-empty">No rolls yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/dice-roll.js"></script>
+</body>
+</html>

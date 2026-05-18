@@ -15,4 +15,8 @@ router.get('/monsters', requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'monsters.html'));
 });
 
+router.get('/dice-roll', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'dice-roll.html'));
+});
+
 module.exports = router;

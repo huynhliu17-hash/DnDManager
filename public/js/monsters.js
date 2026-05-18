@@ -32,6 +32,13 @@ async function loadMonsterList() {
     return;
   }
 
+  if (currentId === null) {
+    currentId = monsters[0].id;
+    const first = await fetch(`/api/monsters/${monsters[0].id}`).then(r => r.json());
+    populateForm(first);
+    showForm();
+  }
+
   list.innerHTML = monsters.map(m => `
     <li class="char-list-item${m.id === currentId ? ' active' : ''}" data-id="${m.id}" onclick="loadMonster(${m.id})">
       <span>${escHtml(m.name || 'Unnamed Monster')}</span>
@@ -100,6 +107,15 @@ async function deleteCurrentMonster() {
   if (!currentId) return;
   if (!confirm('Delete this monster?')) return;
   await fetch(`/api/monsters/${currentId}`, { method: 'DELETE' });
+  currentId = null;
+  monsterAttacks = [];
+  showEmpty();
+  await loadMonsterList();
+}
+
+async function deleteAllMonsters() {
+  if (!confirm('Delete ALL monsters? This cannot be undone.')) return;
+  await fetch('/api/monsters', { method: 'DELETE' });
   currentId = null;
   monsterAttacks = [];
   showEmpty();
@@ -179,7 +195,3 @@ function removeAttack(i) {
   scheduleSave();
 }
 
-// ── Utility ──
-function escHtml(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}

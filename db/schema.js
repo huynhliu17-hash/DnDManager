@@ -126,6 +126,19 @@ module.exports = function initSchema(db) {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS dice_rolls (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      username TEXT NOT NULL,
+      dice_type TEXT NOT NULL,
+      dice_count INTEGER NOT NULL,
+      results TEXT NOT NULL,
+      total INTEGER NOT NULL,
+      rolled_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Grant admin to the 'ed' account (idempotent)
   db.prepare(`UPDATE users SET is_admin = 1 WHERE LOWER(username) = 'ed'`).run();
 };

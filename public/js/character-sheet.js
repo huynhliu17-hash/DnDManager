@@ -1,3 +1,18 @@
+// ── Function Index ────────────────────────────────────────────────────────
+// UI       toggleSidebar  closeSidebar  toggleLore
+// Calc     mod  fmtMod  getAbilityScores  recalc
+// State    loadCharList  createNewCharacter  loadCharacter  updateCharList
+//          setStatus  scheduleSave  saveCharacter  deleteCharacter
+// Render   bindDragRow  renderAttacks  addAttack  removeAttack
+//          renderSpells  addSpell  removeSpell  renderSpellSlots  toggleSpellSlot
+// Popup    openSpellPopup  closeSpellPopup  onSpellDescOverlayClick
+// Search   openSearchModal  closeSearchModal  onSearchOverlayClick  addCustomEntry
+//          onDndSearchInput  runDndSearch  gqlSearchSpells  gqlSearchWeapons
+//          renderDndResults  selectDndItem  weaponAbilityMod  weaponBonus  weaponDamage
+// Party    setReadOnly  loadPlayers  onPlayerSelect  loadPartyCharacter
+// Steppers stepNum  initNumSteppers
+// ─────────────────────────────────────────────────────────────────────────
+
 // ── Sidebar toggle ──
 function toggleSidebar() {
   document.getElementById('cs-sidebar').classList.toggle('open');
@@ -621,10 +636,6 @@ function weaponDamage(weapon) {
   const type = weapon.damage.damage_type?.name || '';
   const modStr = abilityMod !== 0 ? fmtMod(abilityMod) : '';
   return `${dice}${modStr} ${type}`.trim();
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ── Party / read-only view ──

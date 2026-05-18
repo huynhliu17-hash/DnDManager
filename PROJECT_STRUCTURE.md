@@ -16,15 +16,18 @@ routes/
   characters.js         — CRUD /api/characters[/:id] · owns ALLOWED_FIELDS list
   monsters.js           — CRUD /api/monsters[/:id] · per-user monster tracking · admin-only
   party.js              — GET /api/players · /api/players/:userId/characters[/:charId]
-  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin)
+  dice.js               — POST /api/dice/roll · GET /api/dice/rolls (last 10, all users)
+  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth)
 public/
   login.html            — auth page (login / register / guest tabs)
   index.html            — home/welcome page
   character-sheet.html  — markup only; loads js/character-sheet.js
   monsters.html         — monster tracker page; loads js/monsters.js
+  dice-roll.html        — dice roller page; loads js/dice-roll.js
   js/
     character-sheet.js  — all frontend state + functions
     monsters.js         — monster list, CRUD, HP bar, attacks table
+    dice-roll.js        — dice type/count selector, roll, result display, roll history
   style.css             — single CSS file, all styles, CSS vars
 data.db                 — SQLite binary (do not edit directly)
 ```
@@ -74,6 +77,18 @@ data.db                 — SQLite binary (do not edit directly)
 | backstory, allies_organizations, additional_features, treasure | TEXT DEFAULT '' | |
 | created_at, updated_at | DATETIME | `updated_at` set on every PUT |
 
+### dice_rolls
+| col | type | notes |
+|-----|------|-------|
+| id | INTEGER PK AUTOINCREMENT | |
+| user_id | TEXT NOT NULL | `'guest'` or `String(rowid)` |
+| username | TEXT NOT NULL | display name at time of roll |
+| dice_type | TEXT NOT NULL | `'d4'`…`'d100'` |
+| dice_count | INTEGER NOT NULL | 1–20 |
+| results | TEXT NOT NULL | JSON array of individual roll values |
+| total | INTEGER NOT NULL | sum of results |
+| rolled_at | DATETIME | |
+
 ## API Routes
 
 ### Auth (`routes/auth.js`, mounted at `/api`)
@@ -101,7 +116,14 @@ data.db                 — SQLite binary (do not edit directly)
 | POST | /api/monsters | create empty monster, return full row |
 | GET | /api/monsters/:id | full row, 404 if not owned |
 | PUT | /api/monsters/:id | partial update via ALLOWED_FIELDS, sets updated_at |
+| DELETE | /api/monsters | delete all monsters for current user |
 | DELETE | /api/monsters/:id | 404 if not owned |
+
+### Dice (`routes/dice.js`, mounted at `/api/dice`)
+| method | path | notes |
+|--------|------|-------|
+| POST | /api/dice/roll | roll dice; body: `{diceType, count}`; returns `{id,diceType,diceCount,results,total}` |
+| GET | /api/dice/rolls | last 10 rolls from all users; returns array |
 
 ### Party (`routes/party.js`, mounted at `/api/players`)
 | method | path | notes |
@@ -121,7 +143,7 @@ data.db                 — SQLite binary (do not edit directly)
 
 ## Page Access Policy
 Every page route must use `requireAuth` (all logged-in users) or `requireAdmin` (admins only). No page may be added without choosing one.
-- `/` and `/character-sheet` — `requireAuth`
+- `/` and `/character-sheet` and `/dice-roll` — `requireAuth`
 - `/monsters` — `requireAdmin`
 
 ## Frontend (`public/js/character-sheet.js`)

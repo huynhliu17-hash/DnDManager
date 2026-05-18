@@ -42,6 +42,12 @@ router.put('/:id', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
+router.delete('/', requireAdmin, (req, res) => {
+  const userId = String(req.session.userId);
+  db.prepare('DELETE FROM monsters WHERE user_id = ?').run(userId);
+  res.json({ success: true });
+});
+
 router.delete('/:id', requireAdmin, (req, res) => {
   const userId = String(req.session.userId);
   const result = db.prepare('DELETE FROM monsters WHERE id = ? AND user_id = ?').run(req.params.id, userId);
