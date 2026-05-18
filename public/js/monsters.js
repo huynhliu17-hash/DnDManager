@@ -165,6 +165,20 @@ function updateHpBar() {
   fill.className = 'mn-hp-fill ' + (pct > 50 ? 'hp-high' : pct > 25 ? 'hp-mid' : 'hp-low');
 }
 
+// ── HP damage ──
+function applyDamage() {
+  if (!currentId) return;
+  const dmgInput = document.getElementById('mn-damage-input');
+  const dmg = parseInt(dmgInput.value) || 0;
+  if (dmg <= 0) return;
+
+  const curEl = document.getElementById('mn-current-hp');
+  curEl.value = Math.max(0, (parseInt(curEl.value) || 0) - dmg);
+  dmgInput.value = '';
+  updateHpBar();
+  scheduleSave();
+}
+
 // ── Attacks ──
 function renderAttacks() {
   const tbody = document.getElementById('mn-attacks-body');

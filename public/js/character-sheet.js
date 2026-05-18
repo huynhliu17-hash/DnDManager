@@ -1,6 +1,6 @@
 // ── Function Index ────────────────────────────────────────────────────────
 // UI       toggleSidebar  closeSidebar  toggleLore
-// Calc     mod  fmtMod  getAbilityScores  recalc
+// Calc     mod  fmtMod  getAbilityScores  recalc  applyDamage
 // State    loadCharList  createNewCharacter  loadCharacter  updateCharList
 //          setStatus  scheduleSave  saveCharacter  deleteCharacter
 // Render   bindDragRow  renderAttacks  addAttack  removeAttack
@@ -227,6 +227,29 @@ function updateCharList() {
   document.querySelectorAll('.char-list-item').forEach((li, i) => {
     li.classList.toggle('active', li.dataset.charId === String(currentId));
   });
+}
+
+// ── HP damage ──
+function applyDamage() {
+  if (isReadOnly) return;
+  const dmgInput = document.getElementById('damage-input');
+  const dmg = parseInt(dmgInput.value) || 0;
+  if (dmg <= 0) return;
+
+  const tempEl = document.getElementById('temp_hp');
+  const curEl  = document.getElementById('current_hp');
+  let temp = parseInt(tempEl.value) || 0;
+  let cur  = parseInt(curEl.value)  || 0;
+
+  const tempAbsorb = Math.min(dmg, temp);
+  temp -= tempAbsorb;
+  cur   = Math.max(0, cur - (dmg - tempAbsorb));
+
+  tempEl.value = temp;
+  curEl.value  = cur;
+  dmgInput.value = '';
+  recalc();
+  scheduleSave();
 }
 
 // ── Form input handling ──

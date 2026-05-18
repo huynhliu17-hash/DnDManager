@@ -727,6 +727,33 @@ body {
   font-weight: 700;
 }
 
+.hp-damage-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.hp-damage-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-apply-damage {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-apply-damage:hover {
+  opacity: 0.85;
+}
+
 /* Death saves */
 .death-saves { display: flex; flex-direction: column; gap: 6px; }
 
@@ -1679,6 +1706,33 @@ input[type="number"] { -moz-appearance: textfield; }
 
 .btn-refresh:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
 .btn-refresh:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.history-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.filter-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
 
 .dice-history-wrap { overflow-x: auto; }
 

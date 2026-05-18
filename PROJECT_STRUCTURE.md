@@ -19,7 +19,7 @@ routes/
   characters.js         — CRUD /api/characters[/:id] · owns ALLOWED_FIELDS list
   monsters.js           — CRUD /api/monsters[/:id] · per-user monster tracking · admin-only
   party.js              — GET /api/players · /api/players/:userId/characters[/:charId]
-  dice.js               — POST /api/dice/roll · GET /api/dice/rolls (last 10, all users)
+  dice.js               — POST /api/dice/roll · GET /api/dice/rolls (last 10, all users; ?user= for user-specific last 10) · GET /api/dice/users (all distinct usernames)
   pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth)
 public/
   login.html            — auth page (login / register / guest tabs)
@@ -47,6 +47,8 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `btn-guest-skip` | `login.html` | Guest / skip login |
 | `btn-new-char` | `character-sheet.html` | Sidebar "+ New" character button |
 | `create-char-cta` | `character-sheet.html` | Empty-state "Create your first character" |
+| `btn-apply-damage` | `character-sheet.html` | Apply damage to character HP |
+| `btn-mn-apply-damage` | `monsters.html` | Apply damage to monster HP |
 | `btn-add-attack` | `character-sheet.html`, `monsters.html` | "+ Add Attack" row button |
 | `btn-add-spell` | `character-sheet.html` | "+ Add Spell" row button |
 | `btn-new-monster` | `monsters.html` | Sidebar "+ New" monster button |
@@ -148,6 +150,8 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 |--------|------|-------|
 | POST | /api/dice/roll | roll dice; body: `{diceType, count}`; returns `{id,diceType,diceCount,results,total}` |
 | GET | /api/dice/rolls | last 10 rolls from all users; returns array |
+| GET | /api/dice/rolls?user=`<username>` | last 10 rolls for a specific user; returns array |
+| GET | /api/dice/users | all distinct usernames that have rolls; returns string array |
 
 > **RNG implementation:** Dice are rolled with Squirrel noise (hash-based PRNG, `routes/dice.js:16-24`), seeded per-batch from `crypto.randomBytes(4)` XOR-ed with `process.hrtime.bigint()`. Not `Math.random()`.
 
@@ -273,6 +277,7 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `scheduleSave()` | debounce wrapper; 1200ms before calling `saveMonster()` |
 | `saveMonster()` | PUT current monster to `/api/monsters/:id` |
 | `updateHpBar()` | set HP bar width + class (`hp-high` >50%, `hp-mid` >25%, `hp-low` ≤25%) |
+| `applyDamage()` | deduct `mn-damage-input` value from `current_hp` (floor 0), refresh bar + schedule save |
 | `renderAttacks()` | rebuild attacks table rows from `monsterAttacks[]` |
 | `addAttack()` | push empty entry, re-render, schedule save |
 | `removeAttack(i)` | splice index, re-render, schedule save |
@@ -293,7 +298,9 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `syncCountButtons()` | disable dec/inc buttons at 1/20 boundary |
 | `rollDice()` | POST to `/api/dice/roll`, call `showResult()` + `loadHistory()` |
 | `showResult(data)` | render individual die pips with min/max highlight classes + total |
-| `loadHistory()` | GET `/api/dice/rolls`, call `renderHistory()` |
+| `loadHistory()` | GET `/api/dice/rolls` (or `?user=` when filtered), call `renderFilter()` + `renderHistory()` |
+| `renderFilter(rolls)` | build user-chip filter bar from unique usernames in all-users rolls |
+| `setFilter(username)` / `clearFilter()` | set/clear active user filter and reload history |
 | `renderHistory(rolls)` | render roll history table rows including relative timestamps |
 | `timeAgo(isoStr)` | local relative-time utility (s/m/h/d ago); **candidate to move to `utils.js`** |
 | `logout()` | POST `/api/logout`, redirect to `/login.html` |
