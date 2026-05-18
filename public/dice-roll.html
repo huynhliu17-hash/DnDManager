@@ -65,6 +65,12 @@
           <h2 class="dice-panel-title">Recent Rolls</h2>
           <button class="btn-refresh" id="refresh-btn" onclick="loadHistory()" title="Refresh">&#8635; Refresh</button>
         </div>
+        <div class="history-filter">
+          <label class="filter-label" for="history-user-select">Player</label>
+          <select id="history-user-select" class="filter-select" onchange="onFilterChange(this.value)">
+            <option value="">All players</option>
+          </select>
+        </div>
         <div class="dice-history-wrap">
           <table class="dice-history-table">
             <thead>

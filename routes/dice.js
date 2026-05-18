@@ -53,10 +53,16 @@ router.post('/roll', requireAuth, (req, res) => {
   res.json({ id: row.lastInsertRowid, diceType, diceCount, results, total });
 });
 
+router.get('/users', requireAuth, (req, res) => {
+  const rows = db.prepare('SELECT DISTINCT username FROM dice_rolls ORDER BY username ASC').all();
+  res.json(rows.map(r => r.username));
+});
+
 router.get('/rolls', requireAuth, (req, res) => {
-  const rolls = db.prepare(
-    'SELECT id, username, dice_type, dice_count, results, total, rolled_at FROM dice_rolls ORDER BY id DESC LIMIT 10'
-  ).all();
+  const { user } = req.query;
+  const rolls = user
+    ? db.prepare('SELECT id, username, dice_type, dice_count, results, total, rolled_at FROM dice_rolls WHERE username = ? ORDER BY id DESC LIMIT 10').all(user)
+    : db.prepare('SELECT id, username, dice_type, dice_count, results, total, rolled_at FROM dice_rolls ORDER BY id DESC LIMIT 10').all();
 
   res.json(rolls.map(r => ({ ...r, results: JSON.parse(r.results) })));
 });

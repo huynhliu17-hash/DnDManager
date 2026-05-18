@@ -1,5 +1,7 @@
 let selectedType = 'd20';
 let diceCount = 1;
+let cachedRolls = [];
+let activeFilter = null;
 
 fetch('/api/me').then(r => r.json()).then(data => {
   if (!data.username) { window.location.href = '/login.html'; return; }
@@ -51,6 +53,7 @@ async function rollDice() {
     if (!res.ok) throw new Error('Roll failed');
     const data = await res.json();
     showResult(data);
+    loadFilterUsers();
     loadHistory();
   } catch {
     // silently ignore
@@ -86,7 +89,10 @@ async function loadHistory() {
   refreshBtn.disabled = true;
 
   try {
-    const res = await fetch('/api/dice/rolls');
+    const url = activeFilter
+      ? `/api/dice/rolls?user=${encodeURIComponent(activeFilter)}`
+      : '/api/dice/rolls';
+    const res = await fetch(url);
     if (!res.ok) throw new Error();
     const rolls = await res.json();
     renderHistory(rolls);
@@ -97,10 +103,30 @@ async function loadHistory() {
   }
 }
 
+async function loadFilterUsers() {
+  try {
+    const res = await fetch('/api/dice/users');
+    if (!res.ok) throw new Error();
+    const usernames = await res.json();
+    const select = document.getElementById('history-user-select');
+    const current = select.value;
+    select.innerHTML = '<option value="">All players</option>' +
+      usernames.map(u => `<option value="${escHtml(u)}"${u === current ? ' selected' : ''}>${escHtml(u)}</option>`).join('');
+  } catch {
+    // silently ignore
+  }
+}
+
+function onFilterChange(value) {
+  activeFilter = value || null;
+  loadHistory();
+}
+
 function renderHistory(rolls) {
   const tbody = document.getElementById('history-body');
   if (rolls.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="history-empty">No rolls yet.</td></tr>';
+    const msg = activeFilter ? `${escHtml(activeFilter)} has no roll history.` : 'No rolls yet.';
+    tbody.innerHTML = `<tr><td colspan="5" class="history-empty">${msg}</td></tr>`;
     return;
   }
   tbody.innerHTML = rolls.map(r => `
@@ -130,4 +156,5 @@ async function logout() {
   window.location.href = '/login.html';
 }
 
+loadFilterUsers();
 loadHistory();
