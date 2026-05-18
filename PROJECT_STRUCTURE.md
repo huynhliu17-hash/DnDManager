@@ -25,10 +25,11 @@ public/
   monsters.html         — monster tracker page; loads js/monsters.js
   dice-roll.html        — dice roller page; loads js/dice-roll.js
   js/
+    utils.js            — shared helpers (escHtml)
     character-sheet.js  — all frontend state + functions
     monsters.js         — monster list, CRUD, HP bar, attacks table
     dice-roll.js        — dice type/count selector, roll, result display, roll history
-  style.css             — single CSS file, all styles, CSS vars
+  style.css             — single CSS file, all styles; CSS custom props defined in :root
 data.db                 — SQLite binary (do not edit directly)
 ```
 
@@ -70,8 +71,8 @@ data.db                 — SQLite binary (do not edit directly)
 | hit_dice | TEXT DEFAULT '' | e.g. `"5d10"` |
 | death_save_success, death_save_fail | INTEGER DEFAULT 0 | count 0–3 |
 | attacks | TEXT DEFAULT '[]' | JSON: `[{name,bonus,damage}]` |
-| spells | TEXT DEFAULT '[]' | JSON: `[{name,level,notes,description,custom}]` |
-| spell_slots | TEXT DEFAULT '[]' | JSON: 9 items `[{pips:[bool×4]}]` indexed 1–9 |
+| spells | TEXT DEFAULT '[]' | JSON: `[{name,level,notes,description,custom}]`; added via migration |
+| spell_slots | TEXT DEFAULT '[]' | JSON: 9 items `[{pips:[bool×4]}]` indexed 1–9; added via migration |
 | cp, sp, ep, gp, pp | INTEGER DEFAULT 0 | |
 | equipment, personality_traits, ideals, bonds, flaws, features_traits | TEXT DEFAULT '' | |
 | backstory, allies_organizations, additional_features, treasure | TEXT DEFAULT '' | |
@@ -138,12 +139,12 @@ data.db                 — SQLite binary (do not edit directly)
 - `userId` stored as string: guest=`'guest'`, users=`String(lastInsertRowid)`
 - `isAdmin` stored in session as boolean; set on login/register from `users.is_admin`
 - New accounts always have `is_admin = 0`; admin must be granted directly in the DB
+- Exception: `db/schema.js` unconditionally sets `is_admin = 1` for any account with username `'ed'` (case-insensitive) at every startup
 - Passwordless: `password_hash=NULL`; login checks username exists only
 - Session: 24h maxAge, secure:false (HTTP/LAN only)
 
 ## Page Access Policy
-Every page route must use `requireAuth` (all logged-in users) or `requireAdmin` (admins only). No page may be added without choosing one.
-- `/` and `/character-sheet` and `/dice-roll` — `requireAuth`
+- `/`, `/character-sheet`, `/dice-roll` — `requireAuth`
 - `/monsters` — `requireAdmin`
 
 ## Frontend (`public/js/character-sheet.js`)
@@ -151,43 +152,23 @@ Every page route must use `requireAuth` (all logged-in users) or `requireAdmin` 
 ### State
 | var | description |
 |-----|-------------|
-| `currentUser` | `{username, guest}` from `/api/me` |
+| `currentUser` | `{username, guest, admin}` from `/api/me` |
 | `currentId` | active character id (`null` = party view / none) |
 | `isReadOnly` | true when viewing another player's char |
-| `attacks` | `[{name,bonus,damage}]` for current char |
-| `spells` | `[{name,level,notes,description,custom}]` |
-| `spellSlots` | array of 9 `{pips:[bool×4]}` objects |
-| `saveTimer` | debounce handle (1200ms) |
 
 ### Key Functions
 | fn | purpose |
 |----|---------|
-| `recalc()` | recompute mods, saves, skills, passive perc from DOM |
-| `scheduleSave()` | debounce → `saveCharacter()` after 1200ms |
-| `saveCharacter()` | PUT /api/characters/:currentId |
-| `loadCharacter(id)` | GET + populate form, setReadOnly(false) |
-| `loadPartyCharacter(userId,charId,name)` | GET + populate form, setReadOnly(true) |
-| `setReadOnly(bool, name)` | toggle inputs disabled/readOnly, hide save bar |
-| `createNewCharacter()` | POST (create) then loadCharacter |
-| `renderAttacks()` / `renderSpells()` | rebuild table rows |
-| `renderSpellSlots()` | rebuild spell slot pip grid (all 9 levels) |
-| `openSearchModal(ctx)` | open D&D 5e search popup; ctx = 'attack' or 'spell' |
-| `gqlSearchSpells(name)` | POST dnd5eapi.co/graphql |
-| `gqlSearchWeapons(name)` | GET dnd5eapi.co/api/equipment-categories/weapon + detail |
-| `escHtml(s)` | sanitize strings for innerHTML |
-| `loadCharList()` / `loadPlayers()` | refresh sidebar lists |
-| `initNumSteppers()` | wrap number inputs with ▲/▼ stepper buttons |
+| `recalc()` | recompute ability mods, saving throws, skills, and passive perception from DOM values |
+| `openSearchModal(ctx)` | open D&D 5e search popup; `ctx = 'attack'` searches weapons, `'spell'` searches spells |
+| `gqlSearchSpells(name)` | POST to dnd5eapi.co/graphql; returns up to 20 matching spells |
+| `gqlSearchWeapons(name)` | fetches weapon list (cached) then individual detail per match |
+| `setReadOnly(bool, name)` | disables inputs, hides save bar, shows readonly banner with player name |
+| `loadPartyCharacter(userId,charId,name)` | loads another player's sheet and sets read-only mode |
 
 ### Data Attribute Conventions
 - `data-field="fieldName"` — main sheet inputs; triggers `recalc()` + `scheduleSave()`
 - `data-death="success|fail"` + `data-idx` — death save checkboxes
-
-## CSS Variables (`style.css :root`)
-```css
---bg: #1a1a2e       --surface: #16213e    --surface2: #0f3460
---accent: #e94560   --accent2: #c4972a    --text: #eaeaea
---text-muted: #888  --border: #2a2a4a     --radius: 8px
-```
 
 ## Key Conventions
 - DB queries are synchronous (better-sqlite3); only auth routes use async/await (bcrypt)

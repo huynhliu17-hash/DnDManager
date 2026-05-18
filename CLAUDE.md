@@ -6,10 +6,10 @@ See `PROJECT_STRUCTURE.md` for the authoritative reference on this project: file
 
 **Keep `PROJECT_STRUCTURE.md` up to date whenever:**
 - A route is added, removed, or its path/method/auth changes
-- A DB table or column is added, removed, or altered
-- A new file is added or an existing file is moved/deleted
-- A new frontend page or significant JS function is introduced
-- Auth behavior or session logic changes
+- A DB table or column is added, removed, or altered (including migrations)
+- A new file is added or an existing file is moved/deleted (including `public/js/` utilities)
+- A new frontend page or significant JS function is introduced, or a function moves between files
+- Auth behavior or session logic changes, including any hardcoded bootstrap grants in `db/schema.js`
 
 ## Page Access Policy
 
