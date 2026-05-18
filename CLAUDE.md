@@ -4,6 +4,8 @@
 
 See `PROJECT_STRUCTURE.md` for the authoritative reference on this project: file map, DB schema, API routes, frontend architecture, and coding conventions.
 
+**When looking for any project information, always grep `PROJECT_STRUCTURE.md` for the relevant section first — this takes priority over exploring the project manually.** Only read the file in full if the needed information is not found via grep. Available sections are listed at the top of the file.
+
 **Keep `PROJECT_STRUCTURE.md` up to date whenever:**
 - A route is added, removed, or its path/method/auth changes
 - A DB table or column is added, removed, or altered (including migrations)

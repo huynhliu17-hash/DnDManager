@@ -1,5 +1,8 @@
 # PROJECT_STRUCTURE
 
+> Grep `## <Section>` to jump without reading the full file.
+> Sections: Stack · File Map · Key Element IDs · DB Schema · API Routes · Auth Model · Page Access Policy · Frontend · Key Conventions · Running
+
 ## Stack
 Node.js (CommonJS) · Express 5 · better-sqlite3 · express-session + bcryptjs · crypto (built-in, used for dice RNG seeding) · Vanilla JS, no build step
 
