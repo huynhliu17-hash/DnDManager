@@ -1,7 +1,7 @@
 # PROJECT_STRUCTURE
 
 ## Stack
-Node.js (CommonJS) · Express 5 · better-sqlite3 · express-session + bcryptjs · Vanilla JS, no build step
+Node.js (CommonJS) · Express 5 · better-sqlite3 · express-session + bcryptjs · crypto (built-in, used for dice RNG seeding) · Vanilla JS, no build step
 
 ## File Map
 ```
@@ -33,6 +33,26 @@ public/
 data.db                 — SQLite binary (do not edit directly)
 ```
 
+## Key Element IDs
+
+IDs on action buttons whose CSS class is shared across elements, making grep by class noisy. Use `grep id="<id>"` to jump directly to the element.
+
+| id | file | element |
+|----|------|---------|
+| `btn-login-submit` | `login.html` | Login form submit |
+| `btn-register-submit` | `login.html` | Register form submit |
+| `btn-guest-skip` | `login.html` | Guest / skip login |
+| `btn-new-char` | `character-sheet.html` | Sidebar "+ New" character button |
+| `create-char-cta` | `character-sheet.html` | Empty-state "Create your first character" |
+| `btn-add-attack` | `character-sheet.html`, `monsters.html` | "+ Add Attack" row button |
+| `btn-add-spell` | `character-sheet.html` | "+ Add Spell" row button |
+| `btn-new-monster` | `monsters.html` | Sidebar "+ New" monster button |
+| `create-monster-cta` | `monsters.html` | Empty-state "Add your first monster" |
+| `btn-delete-monster` | `monsters.html` | Delete current monster (save bar) |
+| `btn-delete-all-monsters` | `monsters.html` | Delete all monsters (sidebar footer) |
+| `roll-btn` | `dice-roll.html` | Primary roll CTA |
+| `refresh-btn` | `dice-roll.html` | Refresh history |
+
 ## DB Schema
 
 ### users
@@ -41,7 +61,7 @@ data.db                 — SQLite binary (do not edit directly)
 | id | INTEGER PK AUTOINCREMENT | |
 | username | TEXT UNIQUE NOT NULL | |
 | password_hash | TEXT | nullable — passwordless accounts allowed |
-| is_admin | INTEGER NOT NULL DEFAULT 0 | 1 = admin; new accounts always get 0 |
+| is_admin | INTEGER NOT NULL DEFAULT 0 | 1 = admin; new accounts always get 0; *(migration)* — not in initial CREATE TABLE |
 | created_at | DATETIME | |
 
 ### monsters
@@ -71,8 +91,8 @@ data.db                 — SQLite binary (do not edit directly)
 | hit_dice | TEXT DEFAULT '' | e.g. `"5d10"` |
 | death_save_success, death_save_fail | INTEGER DEFAULT 0 | count 0–3 |
 | attacks | TEXT DEFAULT '[]' | JSON: `[{name,bonus,damage}]` |
-| spells | TEXT DEFAULT '[]' | JSON: `[{name,level,notes,description,custom}]`; added via migration |
-| spell_slots | TEXT DEFAULT '[]' | JSON: 9 items `[{pips:[bool×4]}]` indexed 1–9; added via migration |
+| spells | TEXT DEFAULT '[]' | JSON: `[{name,level,notes,description,custom}]`; *(migration)* — not in initial CREATE TABLE |
+| spell_slots | TEXT DEFAULT '[]' | JSON: 9 items `[{pips:[bool×4]}]` levels 1–9 (array index 0–8, use `level-1`); *(migration)* — not in initial CREATE TABLE |
 | cp, sp, ep, gp, pp | INTEGER DEFAULT 0 | |
 | equipment, personality_traits, ideals, bonds, flaws, features_traits | TEXT DEFAULT '' | |
 | backstory, allies_organizations, additional_features, treasure | TEXT DEFAULT '' | |
@@ -126,11 +146,13 @@ data.db                 — SQLite binary (do not edit directly)
 | POST | /api/dice/roll | roll dice; body: `{diceType, count}`; returns `{id,diceType,diceCount,results,total}` |
 | GET | /api/dice/rolls | last 10 rolls from all users; returns array |
 
+> **RNG implementation:** Dice are rolled with Squirrel noise (hash-based PRNG, `routes/dice.js:16-24`), seeded per-batch from `crypto.randomBytes(4)` XOR-ed with `process.hrtime.bigint()`. Not `Math.random()`.
+
 ### Party (`routes/party.js`, mounted at `/api/players`)
 | method | path | notes |
 |--------|------|-------|
 | GET | /api/players | other registered users; guests get `[]` |
-| GET | /api/players/:userId/characters | list chars for any user |
+| GET | /api/players/:userId/characters | list chars for any user; returns `id, character_name, class_level, race` (no `updated_at`) |
 | GET | /api/players/:userId/characters/:charId | full sheet, no ownership check |
 
 ## Auth Model
@@ -142,6 +164,7 @@ data.db                 — SQLite binary (do not edit directly)
 - Exception: `db/schema.js` unconditionally sets `is_admin = 1` for any account with username `'ed'` (case-insensitive) at every startup
 - Passwordless: `password_hash=NULL`; login checks username exists only
 - Session: 24h maxAge, secure:false (HTTP/LAN only)
+- `/api/me` does a manual `if (!req.session.userId)` check (returns 401 JSON) rather than `requireAuth` (which would redirect to `/login.html`); all other protected routes use middleware
 
 ## Page Access Policy
 - `/`, `/character-sheet`, `/dice-roll` — `requireAuth`
@@ -149,34 +172,137 @@ data.db                 — SQLite binary (do not edit directly)
 
 ## Frontend (`public/js/character-sheet.js`)
 
+> Note: file has an accurate function index comment at lines 1–14 that mirrors the groups below.
+
 ### State
 | var | description |
 |-----|-------------|
 | `currentUser` | `{username, guest, admin}` from `/api/me` |
 | `currentId` | active character id (`null` = party view / none) |
 | `isReadOnly` | true when viewing another player's char |
+| `saveTimer` | debounce handle for auto-save (1200ms) |
+| `attacks` | in-memory array `[{name,bonus,damage}]` for current sheet |
+| `spells` | in-memory array `[{name,level,notes,description,custom}]` for current sheet |
+| `spellSlots` | 9-element array `[{pips:[bool×4]}]`; index 0 = spell level 1 |
+| `searchContext` | `'attack'` or `'spell'`; controls which results flow from the search modal |
+| `searchDebounce` | debounce handle for D&D API search input |
+| `_weaponListCache` | cached weapon list from dnd5eapi.co (fetched once per session) |
+| `_weaponDetailCache` | cached weapon detail objects keyed by index |
+| `_dragSrcIdx` | drag-source row index during drag-to-reorder operations |
+| `spellPopupIdx` | index of the spell currently open in the description popup (`null` = closed) |
 
 ### Key Functions
 | fn | purpose |
 |----|---------|
+| `loadCharList()` | fetch character list from `/api/characters`, populate sidebar, auto-load first |
+| `createNewCharacter()` | POST to `/api/characters`, set as active, refresh sidebar |
+| `loadCharacter(id)` | GET `/api/characters/:id`, populate all DOM inputs, parse JSON fields |
+| `updateCharList()` | re-render sidebar list items without a full reload |
+| `saveCharacter()` | PUT current sheet to `/api/characters/:id`; serialises attacks/spells/spellSlots as JSON |
+| `deleteCharacter(id?)` | DELETE character by `id`; if omitted, deletes `currentId`; clears state and reloads list |
+| `scheduleSave()` | debounce wrapper; clears/restarts 1200ms timer before calling `saveCharacter()` |
+| `setStatus(msg)` | update save-status text element |
 | `recalc()` | recompute ability mods, saving throws, skills, and passive perception from DOM values |
+| `mod(score)` | returns ability modifier for a given score |
+| `fmtMod(n)` | formats modifier as `+n` / `-n` string |
+| `getAbilityScores()` | returns `{str,dex,con,int,wis,cha}` from DOM inputs |
+| `renderAttacks()` | rebuild attacks table rows from `attacks[]` |
+| `addAttack()` | push empty entry to `attacks[]`, re-render, schedule save |
+| `removeAttack(i)` | splice index from `attacks[]`, re-render, schedule save |
+| `renderSpells()` | rebuild spells table rows from `spells[]` |
+| `addSpell()` | push empty entry to `spells[]`, re-render, schedule save |
+| `removeSpell(i)` | splice index from `spells[]`, re-render, schedule save |
+| `renderSpellSlots()` | rebuild spell-slot pip grid; uses `level-1` for array index |
+| `toggleSpellSlot(level,pip)` | flip a single pip boolean, re-render, schedule save |
+| `bindDragRow(tr)` | attaches dragstart/dragover/drop/dragend handlers to a single `<tr>`; on drop, reads `data-drag-type` to splice `attacks[]` or `spells[]` and re-renders |
 | `openSearchModal(ctx)` | open D&D 5e search popup; `ctx = 'attack'` searches weapons, `'spell'` searches spells |
+| `closeSearchModal()` | hide search modal, reset state |
+| `onSearchOverlayClick(e)` | close modal if click was on overlay (not content) |
+| `runDndSearch()` | dispatch to `gqlSearchSpells` or `gqlSearchWeapons` based on `searchContext` |
 | `gqlSearchSpells(name)` | POST to dnd5eapi.co/graphql; returns up to 20 matching spells |
 | `gqlSearchWeapons(name)` | fetches weapon list (cached) then individual detail per match |
+| `renderDndResults(items, ctx, container)` | render search results into `container`; `ctx` controls attack vs spell detail display |
+| `selectDndItem(item)` | populate attack or spell row from a D&D API result |
+| `addCustomEntry()` | add a blank row from the search modal (no API item) |
+| `weaponAbilityMod(props)` | determine STR vs DEX modifier for a weapon |
+| `weaponBonus(props)` | compute total attack bonus string |
+| `weaponDamage(props)` | compute damage string including ability modifier |
+| `openSpellPopup(i)` | open spell-description popup for spell at index `i` |
+| `closeSpellPopup()` | close spell popup, clear `spellPopupIdx` |
+| `onSpellDescOverlayClick(e)` | close popup if click was on overlay |
 | `setReadOnly(bool, name)` | disables inputs, hides save bar, shows readonly banner with player name |
 | `loadPartyCharacter(userId,charId,name)` | loads another player's sheet and sets read-only mode |
+| `loadPlayers()` | fetch party member list, render player select |
+| `onPlayerSelect(userId)` | load character list for selected player in party panel |
+| `toggleSidebar()` | toggle mobile sidebar open/closed |
+| `closeSidebar()` | close mobile sidebar |
+| `toggleLore(bodyId,arrowId)` | expand/collapse lore section; toggles arrow indicator |
+| `stepNum(el,delta)` | increment/decrement a numeric stepper input by `delta` |
+| `initNumSteppers()` | wire up all `[data-step]` buttons on page load |
 
 ### Data Attribute Conventions
 - `data-field="fieldName"` — main sheet inputs; triggers `recalc()` + `scheduleSave()`
 - `data-death="success|fail"` + `data-idx` — death save checkboxes
+
+### Notable Implementation Details
+- Drag-to-reorder: `bindDragRow(tbody, arr)` handles both attacks and spells tables
+- Double `/api/me` fetch: one at top-level (sets `currentUser`, shows admin nav, calls `loadCharList`); a second inside `DOMContentLoaded` that only updates `nav-username` — the second is partly redundant
+
+## Frontend (`public/js/monsters.js`)
+
+### State
+| var | description |
+|-----|-------------|
+| `currentId` | id of the currently displayed monster (`null` = none) |
+| `saveTimer` | debounce handle for auto-save (1200ms) |
+| `monsterAttacks` | in-memory array `[{name,bonus,damage}]` for current monster |
+
+### Key Functions
+| fn | purpose |
+|----|---------|
+| `loadMonsterList()` | GET `/api/monsters`, render sidebar list; auto-loads first monster if none active |
+| `createNewMonster()` | POST to `/api/monsters`, set as active, refresh list |
+| `loadMonster(id)` | GET `/api/monsters/:id`, call `populateForm()`, highlight active item |
+| `populateForm(monster)` | write monster fields into DOM inputs, parse attacks JSON, call `renderAttacks()` + `updateHpBar()` |
+| `deleteMonster(e,id)` | confirm + DELETE `/api/monsters/:id`; clear state if was active |
+| `deleteCurrentMonster()` | confirm + DELETE current monster via `currentId` |
+| `deleteAllMonsters()` | confirm + DELETE `/api/monsters` (all monsters for user) |
+| `scheduleSave()` | debounce wrapper; 1200ms before calling `saveMonster()` |
+| `saveMonster()` | PUT current monster to `/api/monsters/:id` |
+| `updateHpBar()` | set HP bar width + class (`hp-high` >50%, `hp-mid` >25%, `hp-low` ≤25%) |
+| `renderAttacks()` | rebuild attacks table rows from `monsterAttacks[]` |
+| `addAttack()` | push empty entry, re-render, schedule save |
+| `removeAttack(i)` | splice index, re-render, schedule save |
+| `toggleSidebar()` | toggle mobile sidebar open/closed |
+
+## Frontend (`public/js/dice-roll.js`)
+
+### State
+| var | description |
+|-----|-------------|
+| `selectedType` | active dice type string, e.g. `'d20'`; default `'d20'` |
+| `diceCount` | number of dice to roll; default `1`, clamped 1–20 |
+
+### Key Functions
+| fn | purpose |
+|----|---------|
+| `adjustCount(delta)` | increment/decrement `diceCount` by delta, clamp 1–20, sync buttons |
+| `syncCountButtons()` | disable dec/inc buttons at 1/20 boundary |
+| `rollDice()` | POST to `/api/dice/roll`, call `showResult()` + `loadHistory()` |
+| `showResult(data)` | render individual die pips with min/max highlight classes + total |
+| `loadHistory()` | GET `/api/dice/rolls`, call `renderHistory()` |
+| `renderHistory(rolls)` | render roll history table rows including relative timestamps |
+| `timeAgo(isoStr)` | local relative-time utility (s/m/h/d ago); **candidate to move to `utils.js`** |
+| `logout()` | POST `/api/logout`, redirect to `/login.html` |
 
 ## Key Conventions
 - DB queries are synchronous (better-sqlite3); only auth routes use async/await (bcrypt)
 - `user_id` always stored as `String(req.session.userId)` — ensures `'guest'` works as key
 - Checkbox fields: DB stores 0/1; JS reads `el.checked ? 1 : 0` / `sheet[f] === 1`
 - `attacks`, `spells`, `spell_slots`: JSON strings; parse with try/catch, fallback to `[]`
-- Auto-save: any `data-field` change → `recalc()` + `scheduleSave()` (1200ms debounce)
+- Auto-save: any `data-field` change → `recalc()` + `scheduleSave()` (1200ms debounce); monsters use same 1200ms pattern
 - PUT uses explicit `ALLOWED_FIELDS` list in `routes/characters.js`
+- `timeAgo()` is defined locally in `dice-roll.js` rather than in `utils.js`; candidate for centralisation if future pages need relative timestamps
 
 ## Running
 ```

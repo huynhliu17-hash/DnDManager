@@ -26,7 +26,7 @@
         <input id="login-password" type="password" placeholder="Enter your password (optional)" autocomplete="current-password">
       </div>
       <div id="login-error" class="error-msg hidden"></div>
-      <button type="submit" class="btn-primary">Login</button>
+      <button type="submit" class="btn-primary" id="btn-login-submit">Login</button>
     </form>
 
     <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
@@ -43,11 +43,11 @@
         <input id="reg-confirm" type="password" placeholder="Confirm your password (optional)" autocomplete="new-password">
       </div>
       <div id="register-error" class="error-msg hidden"></div>
-      <button type="submit" class="btn-primary">Create Account</button>
+      <button type="submit" class="btn-primary" id="btn-register-submit">Create Account</button>
     </form>
 
     <div class="skip-divider">or</div>
-    <button class="btn-skip" onclick="handleSkip()">Skip</button>
+    <button class="btn-skip" id="btn-guest-skip" onclick="handleSkip()">Skip</button>
   </div>
 
   <script>

@@ -28,7 +28,7 @@
       <div class="cs-sidebar-header">
         <button class="cs-sidebar-toggle" id="cs-sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
         <span class="cs-sidebar-title">Characters</span>
-        <button class="btn-new-char" onclick="createNewCharacter()">+ New</button>
+        <button class="btn-new-char" id="btn-new-char" onclick="createNewCharacter()">+ New</button>
       </div>
       <ul class="char-list" id="char-list"></ul>
       <div class="cs-sidebar-divider"></div>
@@ -45,7 +45,7 @@
     <section class="cs-sheet" id="cs-sheet">
       <div class="cs-empty" id="cs-empty">
         <p>No characters yet.</p>
-        <button class="btn-primary" onclick="createNewCharacter()">+ Create your first character</button>
+        <button class="btn-primary" id="create-char-cta" onclick="createNewCharacter()">+ Create your first character</button>
       </div>
 
       <form class="cs-form hidden" id="cs-form" autocomplete="off">
@@ -261,7 +261,7 @@
                 </thead>
                 <tbody id="attacks-body"></tbody>
               </table>
-              <button type="button" class="btn-add-row" onclick="addAttack()">+ Add Attack</button>
+              <button type="button" class="btn-add-row" id="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
               <div class="cs-spells-divider"></div>
               <table class="attack-table">
                 <thead>
@@ -269,7 +269,7 @@
                 </thead>
                 <tbody id="spells-body"></tbody>
               </table>
-              <button type="button" class="btn-add-row" onclick="addSpell()">+ Add Spell</button>
+              <button type="button" class="btn-add-row" id="btn-add-spell" onclick="addSpell()">+ Add Spell</button>
             </div>
 
             <!-- Spell Slots -->

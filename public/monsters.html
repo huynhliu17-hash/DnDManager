@@ -28,11 +28,11 @@
       <div class="cs-sidebar-header">
         <button class="cs-sidebar-toggle" id="mn-sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
         <span class="cs-sidebar-title">Monsters</span>
-        <button class="btn-new-char" onclick="createNewMonster()">+ New</button>
+        <button class="btn-new-char" id="btn-new-monster" onclick="createNewMonster()">+ New</button>
       </div>
       <ul class="char-list" id="monster-list"></ul>
       <div class="cs-sidebar-footer">
-        <button class="btn-danger-sm" onclick="deleteAllMonsters()">Delete All Monsters</button>
+        <button class="btn-danger-sm" id="btn-delete-all-monsters" onclick="deleteAllMonsters()">Delete All Monsters</button>
       </div>
     </aside>
 
@@ -41,7 +41,7 @@
       <div class="cs-empty" id="mn-empty">
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
           <p>No monsters yet.</p>
-          <button class="btn-primary" onclick="createNewMonster()">+ Add your first monster</button>
+          <button class="btn-primary" id="create-monster-cta" onclick="createNewMonster()">+ Add your first monster</button>
         </div>
       </div>
 
@@ -50,7 +50,7 @@
         <!-- Save bar -->
         <div class="cs-save-bar">
           <span class="save-status" id="mn-save-status"></span>
-          <button type="button" class="btn-danger-sm" onclick="deleteCurrentMonster()">Delete Monster</button>
+          <button type="button" class="btn-danger-sm" id="btn-delete-monster" onclick="deleteCurrentMonster()">Delete Monster</button>
         </div>
 
         <!-- Name -->
@@ -93,7 +93,7 @@
             </thead>
             <tbody id="mn-attacks-body"></tbody>
           </table>
-          <button type="button" class="btn-add-row" onclick="addAttack()">+ Add Attack</button>
+          <button type="button" class="btn-add-row" id="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
         </div>
 
       </form>
