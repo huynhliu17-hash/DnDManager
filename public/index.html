@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="app-main">
+    <div class="welcome-card">
+      <h2>Welcome back, <span id="welcome-username"></span>!</h2>
+      <p>Select a tool from the navigation bar to get started.</p>
+    </div>
+  </main>
+
+  <script>
+    fetch('/api/me').then(r => r.json()).then(data => {
+      if (!data.username) { window.location.href = '/login.html'; return; }
+      document.getElementById('nav-username').textContent = data.username;
+      document.getElementById('welcome-username').textContent = data.username;
+      if (data.admin) {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+      }
+    });
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>

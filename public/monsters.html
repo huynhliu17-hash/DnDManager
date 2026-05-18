@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monsters — DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Home</a>
+      <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/monsters" class="nav-tab active">Monsters</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="app-main cs-main">
+
+    <!-- Monster selector sidebar -->
+    <aside class="cs-sidebar" id="mn-sidebar">
+      <div class="cs-sidebar-header">
+        <button class="cs-sidebar-toggle" id="mn-sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
+        <span class="cs-sidebar-title">Monsters</span>
+        <button class="btn-new-char" onclick="createNewMonster()">+ New</button>
+      </div>
+      <ul class="char-list" id="monster-list"></ul>
+    </aside>
+
+    <!-- Monster detail area -->
+    <section class="cs-sheet" id="mn-sheet">
+      <div class="cs-empty" id="mn-empty">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <p>No monsters yet.</p>
+          <button class="btn-primary" onclick="createNewMonster()">+ Add your first monster</button>
+        </div>
+      </div>
+
+      <form class="cs-form hidden" id="mn-form" autocomplete="off">
+
+        <!-- Save bar -->
+        <div class="cs-save-bar">
+          <span class="save-status" id="mn-save-status"></span>
+          <button type="button" class="btn-danger-sm" onclick="deleteCurrentMonster()">Delete Monster</button>
+        </div>
+
+        <!-- Name -->
+        <div class="cs-field cs-name-field">
+          <input type="text" id="mn-name" placeholder="Monster Name" class="cs-name-input" oninput="scheduleSave()">
+          <label>Monster Name</label>
+        </div>
+
+        <!-- Combat Stats: AC + HP -->
+        <div class="cs-box">
+          <div class="cs-box-title">Combat Stats</div>
+          <div class="mn-stats-row">
+
+            <div class="mn-stat">
+              <label>Armor Class</label>
+              <input type="number" id="mn-ac" value="10" min="0" class="combat-input" oninput="scheduleSave()">
+            </div>
+
+            <div class="mn-hp-section">
+              <label class="mn-section-label">Hit Points</label>
+              <div class="mn-hp-inputs">
+                <input type="number" id="mn-current-hp" value="0" class="current-hp-input" oninput="updateHpBar();scheduleSave()" placeholder="Current">
+                <span>/</span>
+                <input type="number" id="mn-max-hp" value="0" oninput="updateHpBar();scheduleSave()" placeholder="Max">
+              </div>
+              <div class="mn-hp-bar">
+                <div class="mn-hp-fill hp-high" id="mn-hp-fill" style="width:0%"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Attacks -->
+        <div class="cs-box cs-attacks-box">
+          <div class="cs-box-title">Attacks</div>
+          <table class="attack-table">
+            <thead>
+              <tr><th>Name</th><th>Atk Bonus</th><th>Damage / Type</th><th></th></tr>
+            </thead>
+            <tbody id="mn-attacks-body"></tbody>
+          </table>
+          <button type="button" class="btn-add-row" onclick="addAttack()">+ Add Attack</button>
+        </div>
+
+      </form>
+    </section>
+  </main>
+
+  <script src="/js/monsters.js"></script>
+</body>
+</html>

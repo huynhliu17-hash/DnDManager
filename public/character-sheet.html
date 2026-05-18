@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Sheet — DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Home</a>
+      <a href="/character-sheet" class="nav-tab active">Character Sheet</a>
+      <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="app-main cs-main">
+
+    <!-- Character selector sidebar -->
+    <aside class="cs-sidebar" id="cs-sidebar">
+      <div class="cs-sidebar-header">
+        <button class="cs-sidebar-toggle" id="cs-sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
+        <span class="cs-sidebar-title">Characters</span>
+        <button class="btn-new-char" onclick="createNewCharacter()">+ New</button>
+      </div>
+      <ul class="char-list" id="char-list"></ul>
+      <div class="cs-sidebar-divider"></div>
+      <div class="cs-sidebar-section">
+        <div class="cs-sidebar-section-title">Party</div>
+        <select class="cs-player-select" id="player-select" onchange="onPlayerSelect(this.value)">
+          <option value="">— Select a player —</option>
+        </select>
+        <ul class="char-list" id="party-char-list"></ul>
+      </div>
+    </aside>
+
+    <!-- Sheet area -->
+    <section class="cs-sheet" id="cs-sheet">
+      <div class="cs-empty" id="cs-empty">
+        <p>No characters yet.</p>
+        <button class="btn-primary" onclick="createNewCharacter()">+ Create your first character</button>
+      </div>
+
+      <form class="cs-form hidden" id="cs-form" autocomplete="off">
+
+        <!-- Read-only banner (shown when viewing another player's character) -->
+        <div class="cs-readonly-banner hidden" id="cs-readonly-banner">
+          Viewing <strong id="cs-readonly-player-name"></strong>'s character &mdash; read only
+        </div>
+
+        <!-- Save bar -->
+        <div class="cs-save-bar" id="cs-save-bar">
+          <span class="save-status" id="save-status"></span>
+        </div>
+
+        <!-- ── HEADER ── -->
+        <div class="cs-header-grid">
+          <div class="cs-field cs-name-field">
+            <input type="text" id="character_name" placeholder="Character Name" class="cs-name-input" data-field="character_name">
+            <label>Character Name</label>
+          </div>
+          <div class="cs-header-sub">
+            <div class="cs-field">
+              <input type="text" id="class_level" placeholder="e.g. Fighter 5" data-field="class_level">
+              <label>Class &amp; Level</label>
+            </div>
+            <div class="cs-field">
+              <input type="text" id="background" placeholder="Background" data-field="background">
+              <label>Background</label>
+            </div>
+            <div class="cs-field">
+              <input type="text" id="player_name" placeholder="Player Name" data-field="player_name">
+              <label>Player Name</label>
+            </div>
+            <div class="cs-field">
+              <input type="text" id="race" placeholder="Race" data-field="race">
+              <label>Race</label>
+            </div>
+            <div class="cs-field">
+              <input type="text" id="alignment" placeholder="e.g. Chaotic Good" data-field="alignment">
+              <label>Alignment</label>
+            </div>
+            <div class="cs-field">
+              <input type="number" id="experience_points" placeholder="0" data-field="experience_points">
+              <label>Experience Points</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MAIN COLUMNS ── -->
+        <div class="cs-columns">
+
+          <!-- LEFT: Abilities, Saves, Skills -->
+          <div class="cs-col cs-col-left">
+
+            <!-- Ability Scores -->
+            <div class="cs-box">
+              <div class="cs-box-title">Ability Scores</div>
+              <div class="ability-grid">
+                <div class="ability" data-stat="strength">
+                  <label class="ability-label">STR</label>
+                  <div class="ability-mod" id="mod-strength">+0</div>
+                  <input type="number" id="strength" value="10" min="1" max="30" data-field="strength" class="ability-score">
+                </div>
+                <div class="ability" data-stat="dexterity">
+                  <label class="ability-label">DEX</label>
+                  <div class="ability-mod" id="mod-dexterity">+0</div>
+                  <input type="number" id="dexterity" value="10" min="1" max="30" data-field="dexterity" class="ability-score">
+                </div>
+                <div class="ability" data-stat="constitution">
+                  <label class="ability-label">CON</label>
+                  <div class="ability-mod" id="mod-constitution">+0</div>
+                  <input type="number" id="constitution" value="10" min="1" max="30" data-field="constitution" class="ability-score">
+                </div>
+                <div class="ability" data-stat="intelligence">
+                  <label class="ability-label">INT</label>
+                  <div class="ability-mod" id="mod-intelligence">+0</div>
+                  <input type="number" id="intelligence" value="10" min="1" max="30" data-field="intelligence" class="ability-score">
+                </div>
+                <div class="ability" data-stat="wisdom">
+                  <label class="ability-label">WIS</label>
+                  <div class="ability-mod" id="mod-wisdom">+0</div>
+                  <input type="number" id="wisdom" value="10" min="1" max="30" data-field="wisdom" class="ability-score">
+                </div>
+                <div class="ability" data-stat="charisma">
+                  <label class="ability-label">CHA</label>
+                  <div class="ability-mod" id="mod-charisma">+0</div>
+                  <input type="number" id="charisma" value="10" min="1" max="30" data-field="charisma" class="ability-score">
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspiration + Proficiency -->
+            <div class="cs-box">
+              <div class="cs-mini-stat">
+                <input type="number" id="inspiration" value="0" data-field="inspiration" class="mini-input">
+                <label>Inspiration</label>
+              </div>
+              <div class="cs-mini-stat">
+                <input type="number" id="proficiency_bonus" value="2" data-field="proficiency_bonus" class="mini-input">
+                <label>Proficiency Bonus</label>
+              </div>
+            </div>
+
+            <!-- Saving Throws -->
+            <div class="cs-box">
+              <div class="cs-box-title">Saving Throws</div>
+              <div class="save-list">
+                <div class="save-row"><input type="checkbox" id="save_str" data-field="save_str"><span class="save-val" id="sv-str">+0</span><label>Strength</label></div>
+                <div class="save-row"><input type="checkbox" id="save_dex" data-field="save_dex"><span class="save-val" id="sv-dex">+0</span><label>Dexterity</label></div>
+                <div class="save-row"><input type="checkbox" id="save_con" data-field="save_con"><span class="save-val" id="sv-con">+0</span><label>Constitution</label></div>
+                <div class="save-row"><input type="checkbox" id="save_int" data-field="save_int"><span class="save-val" id="sv-int">+0</span><label>Intelligence</label></div>
+                <div class="save-row"><input type="checkbox" id="save_wis" data-field="save_wis"><span class="save-val" id="sv-wis">+0</span><label>Wisdom</label></div>
+                <div class="save-row"><input type="checkbox" id="save_cha" data-field="save_cha"><span class="save-val" id="sv-cha">+0</span><label>Charisma</label></div>
+              </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="cs-box">
+              <div class="cs-box-title">Skills</div>
+              <div class="cs-box-sub">Passive Perception: <strong id="passive-perc">10</strong></div>
+              <div class="skill-list">
+                <div class="skill-row"><input type="checkbox" id="skill_acrobatics" data-field="skill_acrobatics"><span class="skill-val" id="sk-acrobatics">+0</span><label>Acrobatics <em>(Dex)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_animal_handling" data-field="skill_animal_handling"><span class="skill-val" id="sk-animal_handling">+0</span><label>Animal Handling <em>(Wis)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_arcana" data-field="skill_arcana"><span class="skill-val" id="sk-arcana">+0</span><label>Arcana <em>(Int)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_athletics" data-field="skill_athletics"><span class="skill-val" id="sk-athletics">+0</span><label>Athletics <em>(Str)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_deception" data-field="skill_deception"><span class="skill-val" id="sk-deception">+0</span><label>Deception <em>(Cha)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_history" data-field="skill_history"><span class="skill-val" id="sk-history">+0</span><label>History <em>(Int)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_insight" data-field="skill_insight"><span class="skill-val" id="sk-insight">+0</span><label>Insight <em>(Wis)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_intimidation" data-field="skill_intimidation"><span class="skill-val" id="sk-intimidation">+0</span><label>Intimidation <em>(Cha)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_investigation" data-field="skill_investigation"><span class="skill-val" id="sk-investigation">+0</span><label>Investigation <em>(Int)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_medicine" data-field="skill_medicine"><span class="skill-val" id="sk-medicine">+0</span><label>Medicine <em>(Wis)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_nature" data-field="skill_nature"><span class="skill-val" id="sk-nature">+0</span><label>Nature <em>(Int)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_perception" data-field="skill_perception"><span class="skill-val" id="sk-perception">+0</span><label>Perception <em>(Wis)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_performance" data-field="skill_performance"><span class="skill-val" id="sk-performance">+0</span><label>Performance <em>(Cha)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_persuasion" data-field="skill_persuasion"><span class="skill-val" id="sk-persuasion">+0</span><label>Persuasion <em>(Cha)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_religion" data-field="skill_religion"><span class="skill-val" id="sk-religion">+0</span><label>Religion <em>(Int)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_sleight_of_hand" data-field="skill_sleight_of_hand"><span class="skill-val" id="sk-sleight_of_hand">+0</span><label>Sleight of Hand <em>(Dex)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_stealth" data-field="skill_stealth"><span class="skill-val" id="sk-stealth">+0</span><label>Stealth <em>(Dex)</em></label></div>
+                <div class="skill-row"><input type="checkbox" id="skill_survival" data-field="skill_survival"><span class="skill-val" id="sk-survival">+0</span><label>Survival <em>(Wis)</em></label></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MIDDLE: Combat stats -->
+          <div class="cs-col cs-col-mid">
+
+            <!-- AC / Initiative / Speed -->
+            <div class="cs-box cs-combat-top">
+              <div class="cs-combat-stat">
+                <input type="number" id="armor_class" value="10" data-field="armor_class" class="combat-input">
+                <label>Armor Class</label>
+              </div>
+              <div class="cs-combat-stat">
+                <input type="number" id="initiative" value="0" data-field="initiative" class="combat-input">
+                <label>Initiative</label>
+              </div>
+              <div class="cs-combat-stat">
+                <input type="number" id="speed" value="30" data-field="speed" class="combat-input">
+                <label>Speed</label>
+              </div>
+            </div>
+
+            <!-- HP -->
+            <div class="cs-box">
+              <div class="cs-box-title">Hit Points</div>
+              <div class="hp-grid">
+                <div class="cs-field">
+                  <label>Maximum HP</label>
+                  <input type="number" id="max_hp" value="0" data-field="max_hp">
+                </div>
+                <div class="cs-field">
+                  <label>Current HP</label>
+                  <input type="number" id="current_hp" value="0" data-field="current_hp" class="current-hp-input">
+                </div>
+                <div class="cs-field">
+                  <label>Temporary HP</label>
+                  <input type="number" id="temp_hp" value="0" data-field="temp_hp">
+                </div>
+              </div>
+            </div>
+
+            <!-- Hit Dice + Death Saves -->
+            <div class="cs-box cs-box-row">
+              <div class="cs-half">
+                <div class="cs-box-title">Hit Dice</div>
+                <input type="text" id="hit_dice" placeholder="e.g. 5d10" data-field="hit_dice">
+              </div>
+              <div class="cs-half">
+                <div class="cs-box-title">Death Saves</div>
+                <div class="death-saves">
+                  <div class="death-row">
+                    <span>Successes</span>
+                    <div class="death-pips">
+                      <input type="checkbox" data-death="success" data-idx="0"><input type="checkbox" data-death="success" data-idx="1"><input type="checkbox" data-death="success" data-idx="2">
+                    </div>
+                  </div>
+                  <div class="death-row">
+                    <span>Failures</span>
+                    <div class="death-pips">
+                      <input type="checkbox" data-death="fail" data-idx="0"><input type="checkbox" data-death="fail" data-idx="1"><input type="checkbox" data-death="fail" data-idx="2">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attacks & Spellcasting -->
+            <div class="cs-box cs-attacks-box">
+              <div class="cs-box-title">Attacks &amp; Spellcasting</div>
+              <table class="attack-table">
+                <thead>
+                  <tr><th class="drag-handle-col"></th><th>Name</th><th>Atk Bonus</th><th>Damage / Type</th><th></th></tr>
+                </thead>
+                <tbody id="attacks-body"></tbody>
+              </table>
+              <button type="button" class="btn-add-row" onclick="addAttack()">+ Add Attack</button>
+              <div class="cs-spells-divider"></div>
+              <table class="attack-table">
+                <thead>
+                  <tr><th class="drag-handle-col"></th><th>Spell Name</th><th>Level</th><th>Notes</th><th></th></tr>
+                </thead>
+                <tbody id="spells-body"></tbody>
+              </table>
+              <button type="button" class="btn-add-row" onclick="addSpell()">+ Add Spell</button>
+            </div>
+
+            <!-- Spell Slots -->
+            <div class="cs-box cs-spell-slots-box">
+              <div class="cs-box-title">Spell Slots</div>
+              <div class="spell-slots-grid" id="spell-slots-grid"></div>
+            </div>
+
+            <!-- Currency + Equipment -->
+            <div class="cs-box">
+              <div class="cs-box-title">Equipment &amp; Currency</div>
+              <div class="currency-grid">
+                <div class="cs-field"><label>CP</label><input type="number" id="cp" value="0" data-field="cp"></div>
+                <div class="cs-field"><label>SP</label><input type="number" id="sp" value="0" data-field="sp"></div>
+                <div class="cs-field"><label>EP</label><input type="number" id="ep" value="0" data-field="ep"></div>
+                <div class="cs-field"><label>GP</label><input type="number" id="gp" value="0" data-field="gp"></div>
+                <div class="cs-field"><label>PP</label><input type="number" id="pp" value="0" data-field="pp"></div>
+              </div>
+              <div class="cs-field" style="margin-top:8px">
+                <label>Equipment</label>
+                <textarea id="equipment" rows="6" data-field="equipment" placeholder="List your equipment..."></textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── BOTTOM: Backstory etc ── -->
+        <div class="cs-bottom-grid">
+          <div class="cs-box">
+            <div class="cs-box-title">Allies &amp; Organizations</div>
+            <textarea id="allies_organizations" rows="6" data-field="allies_organizations" placeholder="Factions, allies, enemies..."></textarea>
+          </div>
+          <div class="cs-box">
+            <div class="cs-box-title">Additional Features &amp; Magic Items</div>
+            <textarea id="additional_features" rows="6" data-field="additional_features" placeholder="Other notes, magic items..."></textarea>
+          </div>
+          <div class="cs-box">
+            <div class="cs-box-title">Treasure</div>
+            <textarea id="treasure" rows="6" data-field="treasure" placeholder="Valuables, gems, art objects..."></textarea>
+          </div>
+        </div>
+
+        <!-- ── LORE TAB ── -->
+        <div class="cs-lore-tab">
+          <button type="button" class="cs-lore-toggle" onclick="toggleLore('cs-lore-body', 'cs-lore-arrow')">
+            <span>Lore</span>
+            <span class="cs-lore-arrow" id="cs-lore-arrow">&#9658;</span>
+          </button>
+          <div class="cs-lore-body hidden" id="cs-lore-body">
+            <div class="cs-lore-grid">
+              <div class="cs-box">
+                <div class="cs-box-title">Personality Traits</div>
+                <textarea id="personality_traits" rows="2" data-field="personality_traits" placeholder="How does your character act?"></textarea>
+              </div>
+              <div class="cs-box">
+                <div class="cs-box-title">Ideals</div>
+                <textarea id="ideals" rows="2" data-field="ideals" placeholder="What does your character believe in?"></textarea>
+              </div>
+              <div class="cs-box">
+                <div class="cs-box-title">Bonds</div>
+                <textarea id="bonds" rows="2" data-field="bonds" placeholder="Who or what does your character care about?"></textarea>
+              </div>
+              <div class="cs-box">
+                <div class="cs-box-title">Flaws</div>
+                <textarea id="flaws" rows="2" data-field="flaws" placeholder="What are your character's weaknesses?"></textarea>
+              </div>
+            </div>
+            <div class="cs-box">
+              <div class="cs-box-title">Features &amp; Traits</div>
+              <textarea id="features_traits" rows="4" data-field="features_traits" placeholder="Class features, racial traits, feats..."></textarea>
+            </div>
+            <div class="cs-box">
+              <div class="cs-box-title">Character Backstory</div>
+              <textarea id="backstory" rows="4" data-field="backstory" placeholder="Your character's history..."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </section>
+  </main>
+
+
+  <!-- DnD Search Modal -->
+  <div class="dnd-search-overlay hidden" id="dnd-search-overlay" onclick="onSearchOverlayClick(event)">
+    <div class="dnd-search-modal">
+      <div class="dnd-search-header">
+        <span class="dnd-search-title" id="dnd-search-title">Search Spells</span>
+        <button type="button" class="dnd-search-close" onclick="closeSearchModal()">&#x2715;</button>
+      </div>
+      <div class="dnd-search-body">
+        <input type="text" id="dnd-search-input" class="dnd-search-input" placeholder="Type to search..." oninput="onDndSearchInput()">
+        <div id="dnd-search-results" class="dnd-search-results">
+          <p class="dnd-search-hint">Type to search the D&amp;D 5e database&hellip;</p>
+        </div>
+      </div>
+      <div class="dnd-search-footer">
+        <button type="button" class="btn-cancel" onclick="addCustomEntry()">+ Add Custom</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spell Description Popup -->
+  <div class="spell-desc-overlay hidden" id="spell-desc-overlay" onclick="onSpellDescOverlayClick(event)">
+    <div class="spell-desc-modal">
+      <div class="spell-desc-header">
+        <span class="spell-desc-title" id="spell-desc-title"></span>
+        <button type="button" class="dnd-search-close" onclick="closeSpellPopup()">&#x2715;</button>
+      </div>
+      <div class="spell-desc-body" id="spell-desc-body"></div>
+    </div>
+  </div>
+
+  <script src="/js/character-sheet.js"></script>
+</body>
+</html>

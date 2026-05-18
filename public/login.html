@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DnD Manager — Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-logo">⚔️</div>
+    <h1 class="auth-title">DnD Manager</h1>
+
+    <div class="tab-bar">
+      <button class="tab active" id="tab-login" onclick="showTab('login')">Login</button>
+      <button class="tab" id="tab-register" onclick="showTab('register')">Register</button>
+    </div>
+
+    <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label for="login-username">Username</label>
+        <input id="login-username" type="text" placeholder="Enter your username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" placeholder="Enter your password (optional)" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+      <div class="field">
+        <label for="reg-username">Username</label>
+        <input id="reg-username" type="text" placeholder="Choose a username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="reg-password">Password</label>
+        <input id="reg-password" type="password" placeholder="Choose a password (optional)" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="reg-confirm">Confirm Password</label>
+        <input id="reg-confirm" type="password" placeholder="Confirm your password (optional)" autocomplete="new-password">
+      </div>
+      <div id="register-error" class="error-msg hidden"></div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+
+    <div class="skip-divider">or</div>
+    <button class="btn-skip" onclick="handleSkip()">Skip</button>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('login-error').classList.add('hidden');
+      document.getElementById('register-error').classList.add('hidden');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const errorEl = document.getElementById('login-error');
+      errorEl.classList.add('hidden');
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('login-username').value,
+          password: document.getElementById('login-password').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/';
+      } else {
+        errorEl.textContent = data.error;
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    async function handleSkip() {
+      await fetch('/api/guest', { method: 'POST' });
+      window.location.href = '/';
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const errorEl = document.getElementById('register-error');
+      errorEl.classList.add('hidden');
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-confirm').value;
+      if (password !== confirm) {
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('reg-username').value,
+          password
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/';
+      } else {
+        errorEl.textContent = data.error;
+        errorEl.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# CLAUDE.md
+
+## Project Reference
+
+See `PROJECT_STRUCTURE.md` for the authoritative reference on this project: file map, DB schema, API routes, frontend architecture, and coding conventions.
+
+**Keep `PROJECT_STRUCTURE.md` up to date whenever:**
+- A route is added, removed, or its path/method/auth changes
+- A DB table or column is added, removed, or altered
+- A new file is added or an existing file is moved/deleted
+- A new frontend page or significant JS function is introduced
+- Auth behavior or session logic changes
+
+## Page Access Policy
+
+Every route that serves a page **must** use exactly one of these two middlewares — no exceptions:
+
+- `requireAuth` — accessible to any logged-in user (including guests)
+- `requireAdmin` — accessible only to users with `is_admin = 1`
+
+**No new page may be added without explicitly choosing one of these.** Default to `requireAdmin` when in doubt; switch to `requireAuth` only when the page is intentionally public to all users.
+
+All pages that existed before this rule was added use `requireAuth` (accessible to everyone).
+
+Always import auth middleware with destructuring: `const { requireAuth, requireAdmin } = require('../middleware/auth');`
+
+## Git Commit Policy
+
+- **Never** include `Co-Authored-By: Claude` or any similar AI attribution line in commit messages.
+- **Never** include `Co-Authored-By: Anthropic` or any tool/model name in commit messages.
+- Commit messages must be written as if authored solely by the developer.
