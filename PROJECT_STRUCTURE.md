@@ -1,7 +1,7 @@
 # PROJECT_STRUCTURE
 
 > Grep `## <Section>` to jump without reading the full file.
-> Sections: Stack · File Map · Key Element IDs · DB Schema · API Routes · Auth Model · Page Access Policy · Frontend · Key Conventions · Running
+> Sections: Stack · File Map · Key Element IDs · DB Schema · API Routes · Auth Model · Page Access Policy · Frontend (character-sheet · monsters · dice-roll · loot) · Key Conventions · Running
 
 ## Stack
 Node.js (CommonJS) · Express 5 · better-sqlite3 · express-session + bcryptjs · crypto (built-in, used for dice RNG seeding) · Vanilla JS, no build step
@@ -20,18 +20,21 @@ routes/
   monsters.js           — CRUD /api/monsters[/:id] · per-user monster tracking · admin-only
   party.js              — GET /api/players · /api/players/:userId/characters[/:charId]
   dice.js               — POST /api/dice/roll · GET /api/dice/rolls (last 10, all users; ?user= for user-specific last 10) · GET /api/dice/users (all distinct usernames)
-  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth)
+  loot.js               — CRUD /api/loot[/:id] (loot_items, party-wide) · GET|PUT /api/loot/money (party_money) · requireAuth
+  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth) · GET /loot (requireAuth)
 public/
   login.html            — auth page (login / register / guest tabs)
   index.html            — home/welcome page
   character-sheet.html  — markup only; loads js/character-sheet.js
   monsters.html         — monster tracker page; loads js/monsters.js
   dice-roll.html        — dice roller page; loads js/dice-roll.js
+  loot.html             — party loot page; loads js/loot.js
   js/
     utils.js            — shared helpers (escHtml)
     character-sheet.js  — all frontend state + functions
     monsters.js         — monster list, CRUD, HP bar, attacks table
     dice-roll.js        — dice type/count selector, roll, result display, roll history
+    loot.js             — party money (pp/gp/ep/sp/cp) + add/remove transaction UI, loot item table, notes popup
   style.css             — single CSS file, all styles; CSS custom props defined in :root
 data.db                 — SQLite binary (do not edit directly)
 ```
@@ -115,6 +118,24 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | total | INTEGER NOT NULL | sum of results |
 | rolled_at | DATETIME | |
 
+### loot_items
+| col | type | notes |
+|-----|------|-------|
+| id | INTEGER PK AUTOINCREMENT | |
+| name | TEXT DEFAULT '' | |
+| tag | TEXT DEFAULT '' | Weapon/Armour/Potion/Scroll/Magic/Non-magic/Gem/Art/Currency/Misc |
+| location | TEXT DEFAULT '' | where the item was found |
+| value | TEXT DEFAULT '' | freeform, e.g. `"50 gp"` |
+| quantity | INTEGER DEFAULT 1 | |
+| notes | TEXT DEFAULT '' | freeform description; shown in info popup |
+| created_at | DATETIME | |
+
+### party_money
+| col | type | notes |
+|-----|------|-------|
+| id | INTEGER PK | always 1; single row |
+| cp, sp, ep, gp, pp | INTEGER DEFAULT 0 | copper/silver/electrum/gold/platinum |
+
 ## API Routes
 
 ### Auth (`routes/auth.js`, mounted at `/api`)
@@ -155,6 +176,18 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 
 > **RNG implementation:** Dice are rolled with Squirrel noise (hash-based PRNG, `routes/dice.js:16-24`), seeded per-batch from `crypto.randomBytes(4)` XOR-ed with `process.hrtime.bigint()`. Not `Math.random()`.
 
+### Loot (`routes/loot.js`, mounted at `/api/loot`)
+| method | path | notes |
+|--------|------|-------|
+| GET | /api/loot/money | returns `{cp,sp,ep,gp,pp}` |
+| PUT | /api/loot/money | body: `{cp,sp,ep,gp,pp}`; updates single party_money row |
+| GET | /api/loot | all loot items ordered by created_at |
+| POST | /api/loot | create empty item; returns full row |
+| PUT | /api/loot/:id | partial update via ALLOWED_FIELDS |
+| DELETE | /api/loot/:id | delete item |
+
+> `/api/loot/money` is registered before `/:id` to avoid the route shadowing it.
+
 ### Party (`routes/party.js`, mounted at `/api/players`)
 | method | path | notes |
 |--------|------|-------|
@@ -174,7 +207,7 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 - `/api/me` does a manual `if (!req.session.userId)` check (returns 401 JSON) rather than `requireAuth` (which would redirect to `/login.html`); all other protected routes use middleware
 
 ## Page Access Policy
-- `/`, `/character-sheet`, `/dice-roll` — `requireAuth`
+- `/`, `/character-sheet`, `/dice-roll`, `/loot` — `requireAuth`
 - `/monsters` — `requireAdmin`
 
 ## Frontend (`public/js/character-sheet.js`)
@@ -304,6 +337,36 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `renderHistory(rolls)` | render roll history table rows including relative timestamps |
 | `timeAgo(isoStr)` | local relative-time utility (s/m/h/d ago); **candidate to move to `utils.js`** |
 | `logout()` | POST `/api/logout`, redirect to `/login.html` |
+
+## Frontend (`public/js/loot.js`)
+
+### State
+| var | description |
+|-----|-------------|
+| `items` | in-memory array of all loot item rows |
+| `notesOpenId` | id of the item whose notes popup is open (`null` = closed) |
+| `moneyTimer` | debounce handle for money auto-save (800ms) |
+| `itemTimers` | map of `id → debounce handle` for per-item auto-save (800ms) |
+| `COIN_TO_CP` | conversion table: `{cp:1, sp:10, ep:50, gp:100, pp:1000}` |
+| `COIN_ORDER` | canonical deduction order: `['cp','sp','ep','gp','pp']` |
+
+### Key Functions
+| fn | purpose |
+|----|---------|
+| `loadMoney()` | GET `/api/loot/money`, populate coin inputs |
+| `scheduleMoneySave()` | 800ms debounce before `saveMoney()` |
+| `saveMoney()` | PUT current coin input values to `/api/loot/money` |
+| `applyMoneyTransaction()` | add or subtract a coin amount; on subtract, deducts from selected type first then smallest→largest; errors without changes if insufficient funds |
+| `showMoneyError(msg)` / `clearMoneyError()` | show/hide the `#txn-error` paragraph |
+| `loadItems()` | GET `/api/loot`, store in `items[]`, call `renderItems()` |
+| `renderItems()` | rebuild loot table rows from `items[]`; show/hide empty state |
+| `createItem()` | POST `/api/loot`, push to `items[]`, re-render, focus new row |
+| `removeItem(id)` | DELETE `/api/loot/:id`, remove from `items[]`, re-render |
+| `fieldChange(id, field, value)` | update in-memory item field, call `scheduleItemSave(id)` |
+| `scheduleItemSave(id)` / `saveItem(id)` | debounced PUT for a single item |
+| `openNotesPopup(id)` | populate and show notes popup for item `id` |
+| `closeNotesPopup()` | hide notes popup, clear `notesOpenId` |
+| `onNotesOverlayClick(e)` | close popup if click was on overlay backdrop |
 
 ## Key Conventions
 - DB queries are synchronous (better-sqlite3); only auth routes use async/await (bcrypt)

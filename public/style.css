@@ -1801,3 +1801,208 @@ input[type="number"] { -moz-appearance: textfield; }
   .cs-sheet { padding-left: 0; }
   .cs-lore-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Loot page ── */
+.loot-main {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loot-money-box { flex-shrink: 0; }
+
+.loot-money-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.loot-money-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 72px;
+}
+
+.loot-money-field input {
+  width: 80px;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 8px 6px;
+  font-family: var(--font);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.loot-money-field input:focus { border-color: var(--accent2); }
+
+.loot-money-field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.loot-items-box { flex: 1; }
+
+.loot-items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.loot-create-btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.loot-table-wrap { overflow-x: auto; }
+
+.loot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.loot-table th {
+  text-align: left;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.loot-table td {
+  padding: 4px 4px;
+  vertical-align: middle;
+}
+
+.loot-table input[type="text"],
+.loot-table input[type="number"],
+.loot-table select {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text);
+  padding: 4px 6px;
+  font-size: 0.83rem;
+  font-family: var(--font);
+  transition: border-color 0.15s, background 0.15s;
+  outline: none;
+}
+
+.loot-table input[type="text"]:focus,
+.loot-table input[type="number"]:focus,
+.loot-table select:focus {
+  border-color: var(--accent2);
+  background: var(--surface);
+}
+
+.loot-table input[type="text"]:hover,
+.loot-table input[type="number"]:hover,
+.loot-table select:hover {
+  border-color: var(--border);
+}
+
+.loot-table select {
+  cursor: pointer;
+  appearance: auto;
+  background: var(--bg);
+}
+
+.loot-table select option { background: var(--bg); }
+
+.loot-value-input { max-width: 100px; }
+
+.loot-qty-input {
+  width: 60px !important;
+  text-align: center;
+}
+
+.loot-actions-cell {
+  white-space: nowrap;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.loot-empty {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-style: italic;
+  padding: 16px 0;
+  text-align: center;
+}
+.loot-empty.hidden { display: none; }
+
+.loot-txn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.loot-txn-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: auto;
+}
+.loot-txn-select:focus { border-color: var(--accent2); }
+.loot-txn-select option { background: var(--bg); }
+
+.loot-txn-amount {
+  width: 80px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  padding: 6px 8px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.loot-txn-amount:focus { border-color: var(--accent2); }
+
+.loot-txn-btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.loot-txn-error {
+  color: var(--accent);
+  font-size: 0.82rem;
+  margin-top: 6px;
+}
+.loot-txn-error.hidden { display: none; }
+
+@media (max-width: 600px) {
+  .loot-money-grid { gap: 8px; }
+  .loot-money-field input { width: 64px; }
+}

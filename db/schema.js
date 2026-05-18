@@ -139,6 +139,31 @@ module.exports = function initSchema(db) {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS loot_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT DEFAULT '',
+      tag TEXT DEFAULT '',
+      location TEXT DEFAULT '',
+      value TEXT DEFAULT '',
+      quantity INTEGER DEFAULT 1,
+      notes TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS party_money (
+      id INTEGER PRIMARY KEY,
+      cp INTEGER DEFAULT 0,
+      sp INTEGER DEFAULT 0,
+      ep INTEGER DEFAULT 0,
+      gp INTEGER DEFAULT 0,
+      pp INTEGER DEFAULT 0
+    )
+  `);
+  db.prepare(`INSERT OR IGNORE INTO party_money (id) VALUES (1)`).run();
+
   // Grant admin to the 'ed' account (idempotent)
   db.prepare(`UPDATE users SET is_admin = 1 WHERE LOWER(username) = 'ed'`).run();
 };

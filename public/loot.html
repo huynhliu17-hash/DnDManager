@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loot — DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Home</a>
+      <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/dice-roll" class="nav-tab">Dice Roll</a>
+      <a href="/loot" class="nav-tab active">Loot</a>
+      <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="loot-main">
+
+    <!-- Party Money -->
+    <div class="cs-box loot-money-box">
+      <div class="cs-box-title">Party Money</div>
+      <div class="loot-money-grid">
+        <div class="loot-money-field">
+          <input type="number" id="money-pp" min="0" value="0" oninput="scheduleMoneySave()">
+          <label>PP</label>
+        </div>
+        <div class="loot-money-field">
+          <input type="number" id="money-gp" min="0" value="0" oninput="scheduleMoneySave()">
+          <label>GP</label>
+        </div>
+        <div class="loot-money-field">
+          <input type="number" id="money-ep" min="0" value="0" oninput="scheduleMoneySave()">
+          <label>EP</label>
+        </div>
+        <div class="loot-money-field">
+          <input type="number" id="money-sp" min="0" value="0" oninput="scheduleMoneySave()">
+          <label>SP</label>
+        </div>
+        <div class="loot-money-field">
+          <input type="number" id="money-cp" min="0" value="0" oninput="scheduleMoneySave()">
+          <label>CP</label>
+        </div>
+      </div>
+      <div class="loot-txn-row">
+        <select id="txn-mode" class="loot-txn-select">
+          <option value="add">Add</option>
+          <option value="sub">Remove</option>
+        </select>
+        <input type="number" id="txn-amount" min="1" placeholder="0" class="loot-txn-amount">
+        <select id="txn-currency" class="loot-txn-select">
+          <option value="cp">CP</option>
+          <option value="sp">SP</option>
+          <option value="ep">EP</option>
+          <option value="gp" selected>GP</option>
+          <option value="pp">PP</option>
+        </select>
+        <button type="button" class="btn-primary loot-txn-btn" onclick="applyMoneyTransaction()">Apply</button>
+      </div>
+      <p class="loot-txn-error hidden" id="txn-error"></p>
+    </div>
+
+    <!-- Loot Items -->
+    <div class="cs-box loot-items-box">
+      <div class="loot-items-header">
+        <div class="cs-box-title">Party Loot</div>
+        <button type="button" class="btn-primary loot-create-btn" id="btn-create-item" onclick="createItem()">+ Create Item</button>
+      </div>
+      <div class="loot-table-wrap">
+        <table class="loot-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Tag</th>
+              <th>Location Found</th>
+              <th>Value</th>
+              <th>Qty</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="loot-tbody"></tbody>
+        </table>
+        <p class="loot-empty hidden" id="loot-empty">No items yet. Click &ldquo;+ Create Item&rdquo; to add one.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Item Notes Popup (reuses spell-desc styles) -->
+  <div class="spell-desc-overlay hidden" id="loot-notes-overlay" onclick="onNotesOverlayClick(event)">
+    <div class="spell-desc-modal">
+      <div class="spell-desc-header">
+        <span class="spell-desc-title" id="loot-notes-title">Notes</span>
+        <button type="button" class="dnd-search-close" onclick="closeNotesPopup()">&#x2715;</button>
+      </div>
+      <div class="spell-desc-body" id="loot-notes-body"></div>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/loot.js"></script>
+</body>
+</html>

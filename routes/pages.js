@@ -19,4 +19,8 @@ router.get('/dice-roll', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'dice-roll.html'));
 });
 
+router.get('/loot', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'loot.html'));
+});
+
 module.exports = router;
