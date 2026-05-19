@@ -347,6 +347,10 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `notesOpenId` | id of the item whose notes popup is open (`null` = closed) |
 | `moneyTimer` | debounce handle for money auto-save (800ms) |
 | `itemTimers` | map of `id → debounce handle` for per-item auto-save (800ms) |
+| `searchQuery` | current text in the search bar (filters by item name) |
+| `filterTag` | current tag filter value (`''` = all tags) |
+| `sortCol` | active sort column key (`null` = no sort) |
+| `sortDir` | `'desc'` or `'asc'`; `null` when `sortCol` is null |
 | `COIN_TO_CP` | conversion table: `{cp:1, sp:10, ep:50, gp:100, pp:1000}` |
 | `COIN_ORDER` | canonical deduction order: `['cp','sp','ep','gp','pp']` |
 
@@ -359,7 +363,11 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `applyMoneyTransaction()` | add or subtract a coin amount; on subtract, deducts from selected type first then smallest→largest; errors without changes if insufficient funds |
 | `showMoneyError(msg)` / `clearMoneyError()` | show/hide the `#txn-error` paragraph |
 | `loadItems()` | GET `/api/loot`, store in `items[]`, call `renderItems()` |
-| `renderItems()` | rebuild loot table rows from `items[]`; show/hide empty state |
+| `onSearchInput(val)` | update `searchQuery`, re-render |
+| `onTagFilter(val)` | update `filterTag`, re-render |
+| `toggleSort(col)` | cycle sort: none→desc→asc→none for a column; re-render |
+| `updateSortHeaders()` | sync ▼/▲ icons on `<th>` elements with current `sortCol`/`sortDir` |
+| `renderItems()` | filter `items[]` by search+tag, sort if active, rebuild table rows |
 | `createItem()` | POST `/api/loot`, push to `items[]`, re-render, focus new row |
 | `removeItem(id)` | DELETE `/api/loot/:id`, remove from `items[]`, re-render |
 | `fieldChange(id, field, value)` | update in-memory item field, call `scheduleItemSave(id)` |

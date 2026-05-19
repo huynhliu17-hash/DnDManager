@@ -4,6 +4,11 @@ let notesOpenId = null;
 let moneyTimer = null;
 const itemTimers = {};
 
+let searchQuery = '';
+let filterTag = '';
+let sortCol = null;
+let sortDir = null;
+
 const TAGS = ['', 'Weapon', 'Armour', 'Potion', 'Scroll', 'Magic', 'Non-magic', 'Gem', 'Art', 'Currency', 'Misc'];
 
 // ── Init ──
@@ -20,6 +25,13 @@ async function logout() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const tagFilter = document.getElementById('loot-tag-filter');
+  TAGS.filter(t => t).forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    tagFilter.appendChild(opt);
+  });
   await Promise.all([loadMoney(), loadItems()]);
 });
 
@@ -138,18 +150,77 @@ async function loadItems() {
   renderItems();
 }
 
+function onSearchInput(val) {
+  searchQuery = val;
+  renderItems();
+}
+
+function onTagFilter(val) {
+  filterTag = val;
+  renderItems();
+}
+
+function toggleSort(col) {
+  if (sortCol !== col) {
+    sortCol = col;
+    sortDir = 'desc';
+  } else if (sortDir === 'desc') {
+    sortDir = 'asc';
+  } else {
+    sortCol = null;
+    sortDir = null;
+  }
+  renderItems();
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('.sort-icon').forEach(el => {
+    el.textContent = el.dataset.col === sortCol
+      ? (sortDir === 'desc' ? ' ▼' : ' ▲')
+      : '';
+  });
+}
+
 function renderItems() {
   const tbody = document.getElementById('loot-tbody');
   const empty = document.getElementById('loot-empty');
   tbody.innerHTML = '';
 
-  if (items.length === 0) {
+  updateSortHeaders();
+
+  let visible = items.filter(item => {
+    const matchSearch = !searchQuery || (item.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchTag = !filterTag || item.tag === filterTag;
+    return matchSearch && matchTag;
+  });
+
+  if (sortCol) {
+    visible = visible.slice().sort((a, b) => {
+      let av = a[sortCol] ?? '';
+      let bv = b[sortCol] ?? '';
+      if (sortCol === 'quantity') {
+        av = Number(av) || 0;
+        bv = Number(bv) || 0;
+      } else {
+        av = String(av).toLowerCase();
+        bv = String(bv).toLowerCase();
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  if (visible.length === 0) {
+    empty.textContent = items.length === 0
+      ? 'No items yet. Click “+ Create Item” to add one.'
+      : 'No items match your search or filter.';
     empty.classList.remove('hidden');
     return;
   }
   empty.classList.add('hidden');
 
-  items.forEach(item => {
+  visible.forEach(item => {
     const tr = document.createElement('tr');
     const tagOptions = TAGS.map(t =>
       `<option value="${escHtml(t)}" ${item.tag === t ? 'selected' : ''}>${escHtml(t) || '—'}</option>`

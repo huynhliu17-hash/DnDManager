@@ -73,15 +73,21 @@
         <div class="cs-box-title">Party Loot</div>
         <button type="button" class="btn-primary loot-create-btn" id="btn-create-item" onclick="createItem()">+ Create Item</button>
       </div>
+      <div class="loot-filter-row">
+        <input type="text" id="loot-search" placeholder="Search items…" oninput="onSearchInput(this.value)" class="loot-search-input">
+        <select id="loot-tag-filter" onchange="onTagFilter(this.value)" class="loot-tag-filter-select">
+          <option value="">All Tags</option>
+        </select>
+      </div>
       <div class="loot-table-wrap">
         <table class="loot-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Tag</th>
-              <th>Location Found</th>
-              <th>Value</th>
-              <th>Qty</th>
+              <th class="loot-th-sortable" onclick="toggleSort('name')">Name <span class="sort-icon" data-col="name"></span></th>
+              <th class="loot-th-sortable" onclick="toggleSort('tag')">Tag <span class="sort-icon" data-col="tag"></span></th>
+              <th class="loot-th-sortable" onclick="toggleSort('location')">Location Found <span class="sort-icon" data-col="location"></span></th>
+              <th class="loot-th-sortable" onclick="toggleSort('value')">Value <span class="sort-icon" data-col="value"></span></th>
+              <th class="loot-th-sortable" onclick="toggleSort('quantity')">Qty <span class="sort-icon" data-col="quantity"></span></th>
               <th></th>
             </tr>
           </thead>

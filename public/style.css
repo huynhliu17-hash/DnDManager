@@ -1867,6 +1867,56 @@ input[type="number"] { -moz-appearance: textfield; }
   font-size: 0.85rem;
 }
 
+.loot-filter-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.loot-search-input {
+  flex: 1;
+  min-width: 160px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.loot-search-input:focus { border-color: var(--accent2); }
+.loot-search-input::placeholder { color: var(--text-muted); }
+
+.loot-tag-filter-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: auto;
+}
+.loot-tag-filter-select:focus { border-color: var(--accent2); }
+.loot-tag-filter-select option { background: var(--bg); }
+
+.loot-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.loot-th-sortable:hover { color: var(--text); }
+
+.sort-icon {
+  font-size: 0.65rem;
+  color: var(--accent2);
+}
+
 .loot-table-wrap { overflow-x: auto; }
 
 .loot-table {
