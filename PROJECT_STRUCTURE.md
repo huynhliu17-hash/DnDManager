@@ -136,6 +136,20 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | id | INTEGER PK | always 1; single row |
 | cp, sp, ep, gp, pp | INTEGER DEFAULT 0 | copper/silver/electrum/gold/platinum |
 
+### loot_history
+| col | type | notes |
+|-----|------|-------|
+| id | INTEGER PK AUTOINCREMENT | |
+| user_id | TEXT NOT NULL | session user id (`'guest'` or string rowid) |
+| username | TEXT NOT NULL | display name at time of action |
+| action | TEXT NOT NULL | `'create'` \| `'update'` \| `'delete'` \| `'money'` |
+| item_id | INTEGER | NULL for money actions |
+| item_name | TEXT | snapshot of item name at time of action |
+| field | TEXT | for `update`: which field changed; for `money`: which coin (cp/sp/…) |
+| old_val | TEXT | previous value (NULL for create) |
+| new_val | TEXT | new value (NULL for delete) |
+| ts | DATETIME | UTC timestamp (SQLite CURRENT_TIMESTAMP) |
+
 ## API Routes
 
 ### Auth (`routes/auth.js`, mounted at `/api`)
@@ -179,14 +193,15 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 ### Loot (`routes/loot.js`, mounted at `/api/loot`)
 | method | path | notes |
 |--------|------|-------|
+| GET | /api/loot/history | admin-only; last 500 `loot_history` rows newest-first |
 | GET | /api/loot/money | returns `{cp,sp,ep,gp,pp}` |
-| PUT | /api/loot/money | body: `{cp,sp,ep,gp,pp}`; updates single party_money row |
+| PUT | /api/loot/money | body: `{cp,sp,ep,gp,pp}`; updates single party_money row; logs changed coins |
 | GET | /api/loot | all loot items ordered by created_at |
-| POST | /api/loot | create empty item; returns full row |
-| PUT | /api/loot/:id | partial update via ALLOWED_FIELDS |
-| DELETE | /api/loot/:id | delete item |
+| POST | /api/loot | create empty item; returns full row; logs `create` |
+| PUT | /api/loot/:id | partial update via ALLOWED_FIELDS; logs each changed field |
+| DELETE | /api/loot/:id | delete item; logs `delete` |
 
-> `/api/loot/money` is registered before `/:id` to avoid the route shadowing it.
+> `/api/loot/history` and `/api/loot/money` are registered before `/:id` to avoid route shadowing.
 
 ### Party (`routes/party.js`, mounted at `/api/players`)
 | method | path | notes |
@@ -375,6 +390,11 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `openNotesPopup(id)` | populate and show notes popup for item `id` |
 | `closeNotesPopup()` | hide notes popup, clear `notesOpenId` |
 | `onNotesOverlayClick(e)` | close popup if click was on overlay backdrop |
+| `switchTab(tab)` | switch between `'loot'` and `'history'` tabs; calls `loadHistory()` on switch to history |
+| `loadHistory()` | GET `/api/loot/history`, call `renderHistory()` |
+| `renderHistory(rows)` | render audit log table; shows time/user/action/item/details |
+| `formatHistTs(ts)` | parse SQLite UTC timestamp string to local `toLocaleString()` |
+| `formatHistDetail(row)` | build human-readable detail string from action+field+old/new_val |
 
 ## Key Conventions
 - DB queries are synchronous (better-sqlite3); only auth routes use async/await (bcrypt)

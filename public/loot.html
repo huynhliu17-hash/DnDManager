@@ -24,6 +24,13 @@
 
   <main class="loot-main">
 
+    <div class="loot-tab-bar">
+      <button class="loot-tab active" id="tab-btn-loot" onclick="switchTab('loot')">Loot</button>
+      <button class="loot-tab admin-only" id="tab-btn-history" onclick="switchTab('history')" style="display:none">History</button>
+    </div>
+
+    <div id="tab-loot">
+
     <!-- Party Money -->
     <div class="cs-box loot-money-box">
       <div class="cs-box-title">Party Money</div>
@@ -96,6 +103,30 @@
         <p class="loot-empty hidden" id="loot-empty">No items yet. Click &ldquo;+ Create Item&rdquo; to add one.</p>
       </div>
     </div>
+
+    </div><!-- #tab-loot -->
+
+    <div id="tab-history" class="hidden">
+      <div class="cs-box">
+        <div class="cs-box-title">Change History</div>
+        <div class="loot-history-wrap">
+          <table class="loot-history-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Source</th>
+                <th>Action</th>
+                <th>Item</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="loot-history-tbody"></tbody>
+          </table>
+          <p class="loot-empty hidden" id="loot-history-empty">No history yet.</p>
+        </div>
+      </div>
+    </div><!-- #tab-history -->
 
   </main>
 

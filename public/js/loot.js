@@ -3,6 +3,7 @@ let items = [];
 let notesOpenId = null;
 let moneyTimer = null;
 const itemTimers = {};
+let currentTab = 'loot';
 
 let searchQuery = '';
 let filterTag = '';
@@ -316,4 +317,58 @@ function closeNotesPopup() {
 
 function onNotesOverlayClick(e) {
   if (e.target === document.getElementById('loot-notes-overlay')) closeNotesPopup();
+}
+
+// ── History Tab ──
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-loot').classList.toggle('hidden', tab !== 'loot');
+  document.getElementById('tab-history').classList.toggle('hidden', tab !== 'history');
+  document.getElementById('tab-btn-loot').classList.toggle('active', tab === 'loot');
+  document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+  if (tab === 'history') loadHistory();
+}
+
+async function loadHistory() {
+  const rows = await fetch('/api/loot/history').then(r => r.json());
+  renderHistory(rows);
+}
+
+function renderHistory(rows) {
+  const tbody = document.getElementById('loot-history-tbody');
+  const empty = document.getElementById('loot-history-empty');
+  tbody.innerHTML = '';
+  if (!rows.length) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="loot-hist-ts">${escHtml(formatHistTs(row.ts))}</td>
+      <td>${escHtml(row.username)}</td>
+      <td><span class="loot-hist-source loot-hist-source--${escHtml(row.source || 'loot')}">${escHtml(row.source || 'loot')}</span></td>
+      <td class="loot-hist-action loot-hist-action--${escHtml(row.action)}">${escHtml(row.action)}</td>
+      <td>${escHtml(row.item_name || '—')}</td>
+      <td class="loot-hist-detail">${escHtml(formatHistDetail(row))}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function formatHistTs(ts) {
+  return new Date(ts.replace(' ', 'T') + 'Z').toLocaleString();
+}
+
+function formatHistDetail(row) {
+  const src = row.source || 'loot';
+  switch (row.action) {
+    case 'create': return src === 'sheet' ? 'Created character sheet' : 'Created item';
+    case 'delete': return src === 'sheet' ? 'Deleted character sheet' : 'Deleted item';
+    case 'update': return `${row.field}: "${row.old_val}" → "${row.new_val}"`;
+    case 'money':  return `Party ${row.field}: ${row.old_val} → ${row.new_val}`;
+    default:       return '';
+  }
 }

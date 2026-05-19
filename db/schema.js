@@ -164,6 +164,26 @@ module.exports = function initSchema(db) {
   `);
   db.prepare(`INSERT OR IGNORE INTO party_money (id) VALUES (1)`).run();
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS loot_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      username TEXT NOT NULL,
+      action TEXT NOT NULL,
+      item_id INTEGER,
+      item_name TEXT,
+      field TEXT,
+      old_val TEXT,
+      new_val TEXT,
+      source TEXT NOT NULL DEFAULT 'loot',
+      ts DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  const histCols = db.prepare('PRAGMA table_info(loot_history)').all().map(c => c.name);
+  if (!histCols.includes('source')) {
+    db.exec(`ALTER TABLE loot_history ADD COLUMN source TEXT NOT NULL DEFAULT 'loot'`);
+  }
+
   // Grant admin to the 'ed' account (idempotent)
   db.prepare(`UPDATE users SET is_admin = 1 WHERE LOWER(username) = 'ed'`).run();
 };

@@ -1803,6 +1803,68 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 /* ── Loot page ── */
+.loot-tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.loot-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 8px 20px;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.loot-tab:hover { color: var(--text); }
+.loot-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+.loot-history-wrap { overflow-x: auto; }
+
+.loot-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.loot-history-table th,
+.loot-history-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.loot-history-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.loot-hist-ts { color: var(--text-muted); font-size: 0.78rem; }
+.loot-hist-detail { white-space: normal; max-width: 320px; }
+.loot-hist-action { text-transform: capitalize; font-weight: 600; }
+.loot-hist-action--create { color: #4caf50; }
+.loot-hist-action--delete { color: #e57373; }
+.loot-hist-action--update { color: var(--accent2); }
+.loot-hist-action--money  { color: #ffd54f; }
+.loot-hist-source {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.loot-hist-source--loot  { background: rgba(100,180,255,0.15); color: #64b4ff; }
+.loot-hist-source--sheet { background: rgba(180,130,255,0.15); color: #b482ff; }
+
 .loot-main {
   padding: 24px;
   display: flex;

@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { logHistory } = require('../lib/history');
 const router = express.Router();
 
 const ALLOWED_FIELDS = [
@@ -29,6 +30,11 @@ router.post('/', requireAuth, (req, res) => {
   const userId = String(req.session.userId);
   const result = db.prepare('INSERT INTO character_sheets (user_id) VALUES (?)').run(userId);
   const sheet = db.prepare('SELECT * FROM character_sheets WHERE id = ?').get(result.lastInsertRowid);
+  logHistory(req.session.userId, req.session.username, 'create', {
+    item_id: sheet.id,
+    item_name: sheet.character_name || '',
+    source: 'sheet',
+  });
   res.json(sheet);
 });
 
@@ -41,8 +47,8 @@ router.get('/:id', requireAuth, (req, res) => {
 
 router.put('/:id', requireAuth, (req, res) => {
   const userId = String(req.session.userId);
-  const sheet = db.prepare('SELECT id FROM character_sheets WHERE id = ? AND user_id = ?').get(req.params.id, userId);
-  if (!sheet) return res.status(404).json({ error: 'Not found' });
+  const old = db.prepare('SELECT * FROM character_sheets WHERE id = ? AND user_id = ?').get(req.params.id, userId);
+  if (!old) return res.status(404).json({ error: 'Not found' });
 
   const updates = {};
   for (const key of ALLOWED_FIELDS) {
@@ -53,13 +59,35 @@ router.put('/:id', requireAuth, (req, res) => {
   const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(', ');
   const values = [...Object.values(updates), req.params.id, userId];
   db.prepare(`UPDATE character_sheets SET ${setClauses}, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?`).run(...values);
+
+  for (const f of Object.keys(updates)) {
+    const ov = String(old[f] ?? '');
+    const nv = String(updates[f] ?? '');
+    if (ov !== nv) {
+      logHistory(req.session.userId, req.session.username, 'update', {
+        item_id: old.id,
+        item_name: updates.character_name ?? old.character_name ?? '',
+        field: f,
+        old_val: ov,
+        new_val: nv,
+        source: 'sheet',
+      });
+    }
+  }
+
   res.json({ success: true });
 });
 
 router.delete('/:id', requireAuth, (req, res) => {
   const userId = String(req.session.userId);
-  const result = db.prepare('DELETE FROM character_sheets WHERE id = ? AND user_id = ?').run(req.params.id, userId);
-  if (result.changes === 0) return res.status(404).json({ error: 'Not found' });
+  const old = db.prepare('SELECT id, character_name FROM character_sheets WHERE id = ? AND user_id = ?').get(req.params.id, userId);
+  if (!old) return res.status(404).json({ error: 'Not found' });
+  db.prepare('DELETE FROM character_sheets WHERE id = ? AND user_id = ?').run(req.params.id, userId);
+  logHistory(req.session.userId, req.session.username, 'delete', {
+    item_id: old.id,
+    item_name: old.character_name || '',
+    source: 'sheet',
+  });
   res.json({ success: true });
 });
 
