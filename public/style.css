@@ -139,6 +139,22 @@ body {
 
 .btn-primary:hover { opacity: 0.88; }
 
+.btn-secondary {
+  background: transparent;
+  color: var(--text, #e8e0d0);
+  border: 1px solid var(--border, #555);
+  border-radius: var(--radius);
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: var(--font);
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.07); }
+.btn-secondary:disabled { opacity: 0.55; cursor: default; }
+
 .skip-divider {
   text-align: center;
   color: var(--text-muted, #888);
@@ -1924,7 +1940,13 @@ input[type="number"] { -moz-appearance: textfield; }
   margin-bottom: 12px;
 }
 
-.loot-create-btn {
+.loot-items-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loot-create-btn, .loot-refresh-btn {
   padding: 6px 14px;
   font-size: 0.85rem;
 }

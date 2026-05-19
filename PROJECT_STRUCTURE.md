@@ -21,7 +21,7 @@ routes/
   party.js              — GET /api/players · /api/players/:userId/characters[/:charId]
   dice.js               — POST /api/dice/roll · GET /api/dice/rolls (last 10, all users; ?user= for user-specific last 10) · GET /api/dice/users (all distinct usernames)
   loot.js               — CRUD /api/loot[/:id] (loot_items, party-wide) · GET|PUT /api/loot/money (party_money) · requireAuth
-  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth) · GET /loot (requireAuth)
+  pages.js              — GET / · GET /character-sheet (requireAuth) · GET /monsters (requireAdmin) · GET /dice-roll (requireAuth) · GET /loot (requireAuth) · GET /history (requireAdmin)
 public/
   login.html            — auth page (login / register / guest tabs)
   index.html            — home/welcome page
@@ -29,12 +29,14 @@ public/
   monsters.html         — monster tracker page; loads js/monsters.js
   dice-roll.html        — dice roller page; loads js/dice-roll.js
   loot.html             — party loot page; loads js/loot.js
+  history.html          — admin-only change history page; loads js/history.js
   js/
     utils.js            — shared helpers (escHtml)
     character-sheet.js  — all frontend state + functions
     monsters.js         — monster list, CRUD, HP bar, attacks table
     dice-roll.js        — dice type/count selector, roll, result display, roll history
     loot.js             — party money (pp/gp/ep/sp/cp) + add/remove transaction UI, loot item table, notes popup
+    history.js          — admin-only change history page; loads /api/loot/history and renders audit table
   style.css             — single CSS file, all styles; CSS custom props defined in :root
 data.db                 — SQLite binary (do not edit directly)
 ```
@@ -223,7 +225,7 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 
 ## Page Access Policy
 - `/`, `/character-sheet`, `/dice-roll`, `/loot` — `requireAuth`
-- `/monsters` — `requireAdmin`
+- `/monsters`, `/history` — `requireAdmin`
 
 ## Frontend (`public/js/character-sheet.js`)
 
@@ -390,9 +392,15 @@ IDs on action buttons whose CSS class is shared across elements, making grep by 
 | `openNotesPopup(id)` | populate and show notes popup for item `id` |
 | `closeNotesPopup()` | hide notes popup, clear `notesOpenId` |
 | `onNotesOverlayClick(e)` | close popup if click was on overlay backdrop |
-| `switchTab(tab)` | switch between `'loot'` and `'history'` tabs; calls `loadHistory()` on switch to history |
+
+## Frontend (`public/js/history.js`)
+
+Admin-only page (`/history`). Redirects non-admins to `/`. Fetches from `/api/loot/history` on load.
+
+| Function | Description |
+|---|---|
 | `loadHistory()` | GET `/api/loot/history`, call `renderHistory()` |
-| `renderHistory(rows)` | render audit log table; shows time/user/action/item/details |
+| `renderHistory(rows)` | render audit log table; shows time/user/source/action/item/details |
 | `formatHistTs(ts)` | parse SQLite UTC timestamp string to local `toLocaleString()` |
 | `formatHistDetail(row)` | build human-readable detail string from action+field+old/new_val |
 

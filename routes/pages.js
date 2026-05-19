@@ -23,4 +23,8 @@ router.get('/loot', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'loot.html'));
 });
 
+router.get('/history', requireAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'history.html'));
+});
+
 module.exports = router;

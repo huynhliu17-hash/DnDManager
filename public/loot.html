@@ -15,6 +15,7 @@
       <a href="/dice-roll" class="nav-tab">Dice Roll</a>
       <a href="/loot" class="nav-tab active">Loot</a>
       <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+      <a href="/history" class="nav-tab admin-only" style="display:none">History</a>
     </div>
     <div class="nav-user">
       <span id="nav-username"></span>
@@ -23,13 +24,6 @@
   </nav>
 
   <main class="loot-main">
-
-    <div class="loot-tab-bar">
-      <button class="loot-tab active" id="tab-btn-loot" onclick="switchTab('loot')">Loot</button>
-      <button class="loot-tab admin-only" id="tab-btn-history" onclick="switchTab('history')" style="display:none">History</button>
-    </div>
-
-    <div id="tab-loot">
 
     <!-- Party Money -->
     <div class="cs-box loot-money-box">
@@ -78,7 +72,10 @@
     <div class="cs-box loot-items-box">
       <div class="loot-items-header">
         <div class="cs-box-title">Party Loot</div>
-        <button type="button" class="btn-primary loot-create-btn" id="btn-create-item" onclick="createItem()">+ Create Item</button>
+        <div class="loot-items-header-actions">
+          <button type="button" class="btn-secondary loot-refresh-btn" id="btn-refresh" onclick="refreshLoot()">&#x21bb; Refresh</button>
+          <button type="button" class="btn-primary loot-create-btn" id="btn-create-item" onclick="createItem()">+ Create Item</button>
+        </div>
       </div>
       <div class="loot-filter-row">
         <input type="text" id="loot-search" placeholder="Search items…" oninput="onSearchInput(this.value)" class="loot-search-input">
@@ -103,30 +100,6 @@
         <p class="loot-empty hidden" id="loot-empty">No items yet. Click &ldquo;+ Create Item&rdquo; to add one.</p>
       </div>
     </div>
-
-    </div><!-- #tab-loot -->
-
-    <div id="tab-history" class="hidden">
-      <div class="cs-box">
-        <div class="cs-box-title">Change History</div>
-        <div class="loot-history-wrap">
-          <table class="loot-history-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>User</th>
-                <th>Source</th>
-                <th>Action</th>
-                <th>Item</th>
-                <th>Details</th>
-              </tr>
-            </thead>
-            <tbody id="loot-history-tbody"></tbody>
-          </table>
-          <p class="loot-empty hidden" id="loot-history-empty">No history yet.</p>
-        </div>
-      </div>
-    </div><!-- #tab-history -->
 
   </main>
 

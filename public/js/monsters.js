@@ -7,6 +7,7 @@ function toggleSidebar() {
 fetch('/api/me').then(r => r.json()).then(data => {
   if (!data.username) { window.location.href = '/login.html'; return; }
   document.getElementById('nav-username').textContent = data.username;
+  if (data.admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
   loadMonsterList();
 });
 

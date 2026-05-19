@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History — DnD Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page">
+  <nav class="navbar">
+    <div class="nav-brand">⚔️ DnD Manager</div>
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Home</a>
+      <a href="/character-sheet" class="nav-tab">Character Sheet</a>
+      <a href="/dice-roll" class="nav-tab">Dice Roll</a>
+      <a href="/loot" class="nav-tab">Loot</a>
+      <a href="/monsters" class="nav-tab admin-only" style="display:none">Monsters</a>
+      <a href="/history" class="nav-tab active admin-only" style="display:none">History</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main style="padding:24px;max-width:1100px;margin:0 auto;">
+    <div class="cs-box">
+      <div class="loot-items-header" style="margin-bottom:12px;">
+        <div class="cs-box-title">Change History</div>
+        <button type="button" class="btn-secondary loot-refresh-btn" id="btn-refresh" onclick="refreshHistory()">&#x21bb; Refresh</button>
+      </div>
+      <div class="loot-history-wrap">
+        <table class="loot-history-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>User</th>
+              <th>Source</th>
+              <th>Action</th>
+              <th>Item / Sheet</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+        <p class="loot-empty hidden" id="history-empty">No history yet.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/history.js"></script>
+</body>
+</html>
