@@ -43,6 +43,8 @@
 > **RNG:** Squirrel noise (hash-based PRNG, `routes/dice.js:16-24`), seeded per-batch from `crypto.randomBytes(4)` XOR-ed with `process.hrtime.bigint()`. Not `Math.random()`.
 
 ## Loot (`routes/loot.js`, mounted at `/api/loot`)
+
+> Loot and character PUT routes write audit rows via `logHistory` (`lib/history.js`).
 | method | path | notes |
 |--------|------|-------|
 | GET | /api/loot/history | admin-only; last 500 `loot_history` rows newest-first |

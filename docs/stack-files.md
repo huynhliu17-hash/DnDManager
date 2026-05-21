@@ -11,6 +11,8 @@ server.js               — bootstrap: middleware, mount routers, start/shutdown
 db.js                   — open DB connection, run schema init, export instance
 db/
   schema.js             — CREATE TABLE statements + migrations (called once at startup)
+lib/
+  history.js            — logHistory(userId, username, action, opts): writes a row to loot_history; used by characters.js and loot.js
 middleware/
   auth.js               — requireAuth / requireAdmin middleware; see docs/auth.md
 routes/

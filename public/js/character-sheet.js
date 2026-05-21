@@ -853,12 +853,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('change', () => scheduleSave());
   });
 
-  fetch('/api/me').then(r => r.json()).then(data => {
-    if (!data.username) { window.location.href = '/login.html'; return; }
-    document.getElementById('nav-username').textContent = data.username;
-  });
-
   initNumSteppers();
-  loadCharList();
   loadPlayers();
 });

@@ -29,7 +29,7 @@
 
 ### Notable Implementation Details
 - Drag-to-reorder: `bindDragRow(tbody, arr)` handles both attacks and spells tables via `data-drag-type`
-- Double `/api/me` fetch: one at top-level (sets `currentUser`, shows admin nav, calls `loadCharList`); a second inside `DOMContentLoaded` that only updates `nav-username`
+- Auth + initial data load in top-level fetch (before `DOMContentLoaded`): sets `currentUser`, shows admin nav, calls `loadCharList`; `loadPlayers` runs in `DOMContentLoaded`
 
 ---
 
