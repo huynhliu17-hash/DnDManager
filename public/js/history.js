@@ -1,3 +1,9 @@
+// ── Function Index ──────────────────────────────────────────────────────────
+// Auth     logout
+// History  refreshHistory  loadHistory  renderHistory
+//          formatHistTs  formatHistDetail
+// ────────────────────────────────────────────────────────────────────────────
+
 fetch('/api/me').then(r => r.json()).then(data => {
   if (!data.username) { window.location.href = '/login.html'; return; }
   if (!data.admin) { window.location.href = '/'; return; }

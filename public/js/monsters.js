@@ -1,3 +1,13 @@
+// ── Function Index ──────────────────────────────────────────────────────────
+// UI       toggleSidebar  showEmpty  showForm
+// Auth     logout
+// Monsters loadMonsterList  createNewMonster  loadMonster  populateForm
+//          scheduleSave  saveMonster  deleteMonster  deleteCurrentMonster
+//          deleteAllMonsters
+// HP       updateHpBar  applyDamage
+// Attacks  renderAttacks  addAttack  removeAttack
+// ────────────────────────────────────────────────────────────────────────────
+
 // ── Sidebar toggle ──
 function toggleSidebar() {
   document.getElementById('mn-sidebar').classList.toggle('open');

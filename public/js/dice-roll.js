@@ -1,3 +1,9 @@
+// ── Function Index ──────────────────────────────────────────────────────────
+// Dice     adjustCount  syncCountButtons  rollDice  showResult
+// History  loadHistory  loadFilterUsers  onFilterChange  renderHistory  timeAgo
+// Auth     logout
+// ────────────────────────────────────────────────────────────────────────────
+
 let selectedType = 'd20';
 let diceCount = 1;
 let cachedRolls = [];

@@ -1,3 +1,13 @@
+// ── Function Index ──────────────────────────────────────────────────────────
+// Auth     logout
+// Money    loadMoney  scheduleMoneySave  saveMoney  applyMoneyTransaction
+//          showMoneyError  clearMoneyError
+// Items    refreshLoot  loadItems  createItem  removeItem  fieldChange
+//          scheduleItemSave  saveItem
+// Filter   onSearchInput  onTagFilter  toggleSort  updateSortHeaders  renderItems
+// Notes    openNotesPopup  closeNotesPopup  onNotesOverlayClick
+// ────────────────────────────────────────────────────────────────────────────
+
 // State
 let items = [];
 let notesOpenId = null;

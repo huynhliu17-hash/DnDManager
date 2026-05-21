@@ -2,21 +2,32 @@
 
 ## Project Reference
 
-See `PROJECT_STRUCTURE.md` for the authoritative reference on this project: file map, DB schema, API routes, frontend architecture, and coding conventions.
+See `docs/` for the authoritative project reference, organized by domain:
 
-**When looking for any project information, always grep `PROJECT_STRUCTURE.md` for the relevant section first — this takes priority over exploring the project manually.** Only read the file in full if the needed information is not found via grep. Available sections are listed at the top of the file.
+| Domain | File | Contents |
+|--------|------|----------|
+| Stack & Files | `docs/stack-files.md` | tech stack, file map, key element IDs, conventions |
+| DB Schema | `docs/schema.md` | tables, columns, migration notes |
+| API Routes | `docs/routes.md` | routes, methods, auth, ordering constraints |
+| Auth Model | `docs/auth.md` | session model, middleware, page access policy |
+| Frontend | `docs/frontend.md` | state variables, data attributes, notable details |
 
-**Keep `PROJECT_STRUCTURE.md` up to date whenever:**
-- A route is added, removed, or its path/method/auth changes; also update `## Page Access Policy`
-- A DB table or column is added, removed, or altered (including migrations)
-- A new file is added or an existing file is moved/deleted (including `public/js/` utilities)
-- A frontend JS function is added, removed, renamed, moved between files, or its behavior changes significantly
-- A frontend state variable is added, removed, or renamed
-- A Key Element ID is added or removed (buttons/elements whose CSS class is shared across elements)
-- `ALLOWED_FIELDS` in any route file changes
-- Auth behavior or session logic changes, including any hardcoded bootstrap grants in `db/schema.js`
+**When looking for any project information, grep `docs/` for the relevant domain file first.** `PROJECT_STRUCTURE.md` is the index — start there if unsure which file to grep.
 
-**If `PROJECT_STRUCTURE.md` and the actual code disagree, trust the code and update the doc.**
+**Keep domain docs up to date:**
+
+| When you change… | Update… |
+|-----------------|---------|
+| A route's path, method, or auth | `docs/routes.md`; if page access level changes, also `docs/auth.md` + `## Page Access Policy` below |
+| A DB table or column (incl. migrations) | `docs/schema.md` |
+| A file added, moved, or deleted | `docs/stack-files.md` File Map |
+| A Key Element ID added or removed | `docs/stack-files.md` Key Element IDs |
+| `ALLOWED_FIELDS` in any route | `docs/routes.md` notes for that route |
+| Auth behavior, session logic, or bootstrap grants in `db/schema.js` | `docs/auth.md` |
+| A frontend state variable added, removed, or renamed | `docs/frontend.md` for that JS file |
+| A frontend function added, removed, or renamed | Update the function index comment at the top of the JS file |
+
+**If a domain doc and the actual code disagree, trust the code and update the doc.**
 
 ## Page Access Policy
 
