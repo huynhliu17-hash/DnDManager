@@ -410,7 +410,7 @@ Admin-only page (`/history`). Redirects non-admins to `/`. Fetches from `/api/lo
 - Checkbox fields: DB stores 0/1; JS reads `el.checked ? 1 : 0` / `sheet[f] === 1`
 - `attacks`, `spells`, `spell_slots`: JSON strings; parse with try/catch, fallback to `[]`
 - Auto-save: any `data-field` change → `recalc()` + `scheduleSave()` (1200ms debounce); monsters use same 1200ms pattern
-- PUT uses explicit `ALLOWED_FIELDS` list in `routes/characters.js`
+- PUT uses explicit `ALLOWED_FIELDS` list in `routes/characters.js` and `routes/monsters.js`
 - `timeAgo()` is defined locally in `dice-roll.js` rather than in `utils.js`; candidate for centralisation if future pages need relative timestamps
 
 ## Running

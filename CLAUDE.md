@@ -7,11 +7,16 @@ See `PROJECT_STRUCTURE.md` for the authoritative reference on this project: file
 **When looking for any project information, always grep `PROJECT_STRUCTURE.md` for the relevant section first — this takes priority over exploring the project manually.** Only read the file in full if the needed information is not found via grep. Available sections are listed at the top of the file.
 
 **Keep `PROJECT_STRUCTURE.md` up to date whenever:**
-- A route is added, removed, or its path/method/auth changes
+- A route is added, removed, or its path/method/auth changes; also update `## Page Access Policy`
 - A DB table or column is added, removed, or altered (including migrations)
 - A new file is added or an existing file is moved/deleted (including `public/js/` utilities)
-- A new frontend page or significant JS function is introduced, or a function moves between files
+- A frontend JS function is added, removed, renamed, moved between files, or its behavior changes significantly
+- A frontend state variable is added, removed, or renamed
+- A Key Element ID is added or removed (buttons/elements whose CSS class is shared across elements)
+- `ALLOWED_FIELDS` in any route file changes
 - Auth behavior or session logic changes, including any hardcoded bootstrap grants in `db/schema.js`
+
+**If `PROJECT_STRUCTURE.md` and the actual code disagree, trust the code and update the doc.**
 
 ## Page Access Policy
 
