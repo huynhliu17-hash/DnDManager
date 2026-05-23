@@ -1,12 +1,12 @@
 const express = require('express');
 const db = require('../db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin, requireBotOrAuth } = require('../middleware/auth');
 const { logHistory } = require('../lib/history');
 const router = express.Router();
 
 const ALLOWED_FIELDS = ['name', 'tag', 'location', 'value', 'quantity', 'notes'];
 
-router.use(requireAuth);
+router.use(requireBotOrAuth);
 
 router.get('/history', requireAdmin, (req, res) => {
   const rows = db.prepare(`

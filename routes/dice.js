@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const db = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireBotOrAuth } = require('../middleware/auth');
 const router = express.Router();
 
 const VALID_DICE = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20, d100: 100 };
@@ -27,7 +27,7 @@ function rollDie(faces, index, seed) {
   return Number(squirrelNoise(index, seed) % BigInt(faces)) + 1;
 }
 
-router.post('/roll', requireAuth, (req, res) => {
+router.post('/roll', requireBotOrAuth, (req, res) => {
   const { diceType, count } = req.body;
   const faces = VALID_DICE[diceType];
   if (!faces) return res.status(400).json({ error: 'Invalid dice type' });

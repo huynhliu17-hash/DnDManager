@@ -19,7 +19,7 @@
 | GET | /api/characters | list: id, character_name, class_level, race, updated_at |
 | POST | /api/characters | create empty sheet, return full row |
 | GET | /api/characters/:id | full sheet, 404 if not owned |
-| PUT | /api/characters/:id | partial update via ALLOWED_FIELDS, sets updated_at |
+| PUT | /api/characters/:id | partial update via ALLOWED_FIELDS, sets updated_at; `requireBotOrAuth`; accepts `x-target-user-id` header when bot is caller |
 | DELETE | /api/characters/:id | 404 if not owned |
 
 ## Monsters (`routes/monsters.js`, mounted at `/api/monsters`)
@@ -35,7 +35,7 @@
 ## Dice (`routes/dice.js`, mounted at `/api/dice`)
 | method | path | notes |
 |--------|------|-------|
-| POST | /api/dice/roll | body: `{diceType, count}`; returns `{id,diceType,diceCount,results,total}` |
+| POST | /api/dice/roll | body: `{diceType, count}`; returns `{id,diceType,diceCount,results,total}`; `requireBotOrAuth` |
 | GET | /api/dice/rolls | last 10 rolls from all users; returns array |
 | GET | /api/dice/rolls?user=`<username>` | last 10 rolls for a specific user |
 | GET | /api/dice/users | all distinct usernames that have rolls; returns string array |
@@ -44,7 +44,7 @@
 
 ## Loot (`routes/loot.js`, mounted at `/api/loot`)
 
-> Loot and character PUT routes write audit rows via `logHistory` (`lib/history.js`).
+> All loot routes use `requireBotOrAuth` (bot or logged-in user). Loot and character PUT routes write audit rows via `logHistory` (`lib/history.js`).
 | method | path | notes |
 |--------|------|-------|
 | GET | /api/loot/history | admin-only; last 500 `loot_history` rows newest-first |
@@ -58,6 +58,9 @@
 > **Ordering constraint:** `/api/loot/history` and `/api/loot/money` must be registered before `/:id` to avoid route shadowing.
 
 ## Party (`routes/party.js`, mounted at `/api/players`)
+
+> All party routes use `requireBotOrAuth`. When bot calls `/api/players`, `WHERE id != 'bot'` returns all real users (bot userId is a non-integer string).
+
 | method | path | notes |
 |--------|------|-------|
 | GET | /api/players | other registered users; guests get `[]` |

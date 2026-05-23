@@ -9,4 +9,14 @@ function requireAdmin(req, res, next) {
   res.status(403).json({ error: 'Admin access required' });
 }
 
-module.exports = { requireAuth, requireAdmin };
+function requireBotOrAuth(req, res, next) {
+  const key = req.headers['x-bot-api-key'];
+  if (key && key === process.env.BOT_API_KEY) {
+    req.session.userId = 'bot';
+    req.session.username = 'Discord Bot';
+    return next();
+  }
+  return requireAuth(req, res, next);
+}
+
+module.exports = { requireAuth, requireAdmin, requireBotOrAuth };

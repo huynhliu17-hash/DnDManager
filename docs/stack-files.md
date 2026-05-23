@@ -14,14 +14,14 @@ db/
 lib/
   history.js            — logHistory(userId, username, action, opts): writes a row to loot_history; used by characters.js and loot.js
 middleware/
-  auth.js               — requireAuth / requireAdmin middleware; see docs/auth.md
+  auth.js               — requireAuth / requireAdmin / requireBotOrAuth middleware; see docs/auth.md
 routes/
   auth.js               — POST /api/guest|register|login|logout · GET /api/me
   characters.js         — CRUD /api/characters[/:id] · owns ALLOWED_FIELDS list
   monsters.js           — CRUD /api/monsters[/:id] · per-user monster tracking · admin-only
   party.js              — GET /api/players · /api/players/:userId/characters[/:charId]
   dice.js               — POST /api/dice/roll · GET /api/dice/rolls · GET /api/dice/users
-  loot.js               — CRUD /api/loot[/:id] · GET|PUT /api/loot/money · requireAuth
+  loot.js               — CRUD /api/loot[/:id] · GET|PUT /api/loot/money · requireBotOrAuth
   pages.js              — all page GET routes; see docs/auth.md for access policy
 public/
   login.html            — auth page (login / register / guest tabs)
@@ -40,6 +40,21 @@ public/
     history.js          — admin-only change history; fetches /api/loot/history, renders audit table
   style.css             — single CSS file, all styles; CSS custom props defined in :root
 data.db                 — SQLite binary (do not edit directly)
+bot/                    — Discord bot (separate Node process, own package.json)
+  index.js              — entry point: Discord client, command loader, interactionCreate handler
+  deploy-commands.js    — one-time script: registers slash commands with Discord REST API
+  .env.example          — template for BOT_TOKEN, CLIENT_ID, GUILD_ID, BOT_API_KEY, WEBAPP_URL
+  lib/
+    api.js              — fetch wrapper: prepends WEBAPP_URL, injects x-bot-api-key + x-target-user-id
+    links.js            — getWebAppUserId / setLink / resolveUsername — reads/writes data/links.json
+    dice.js             — parseDiceExpr: parses "2d6+3" → {diceType, count, modifier}
+  commands/
+    roll.js             — /roll <expression>
+    link.js             — /link <username>
+    character.js        — /character view · /character hp <amount>
+    loot.js             — /loot view · add · remove · money
+  data/
+    links.json          — {discordUserId → webAppUserId} (runtime, gitignored)
 docs/                   — domain documentation (this directory)
 ```
 

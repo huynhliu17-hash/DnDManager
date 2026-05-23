@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireBotOrAuth } = require('../middleware/auth');
 const { logHistory } = require('../lib/history');
 const router = express.Router();
 
@@ -45,8 +45,10 @@ router.get('/:id', requireAuth, (req, res) => {
   res.json(sheet);
 });
 
-router.put('/:id', requireAuth, (req, res) => {
-  const userId = String(req.session.userId);
+router.put('/:id', requireBotOrAuth, (req, res) => {
+  const userId = req.session.userId === 'bot' && req.headers['x-target-user-id']
+    ? String(req.headers['x-target-user-id'])
+    : String(req.session.userId);
   const old = db.prepare('SELECT * FROM character_sheets WHERE id = ? AND user_id = ?').get(req.params.id, userId);
   if (!old) return res.status(404).json({ error: 'Not found' });
 

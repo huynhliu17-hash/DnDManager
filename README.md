@@ -73,10 +73,41 @@ docs/                   — authoritative domain documentation
 ## Running
 
 ```
+npm install
 npm start   # node server.js → http://localhost:3000
 ```
 
 No build step required. The database (`data.db`) is created automatically on first run.
+
+## Discord Bot
+
+A separate Discord bot lives in `bot/`. It runs as a second Node process alongside the web app and lets players use slash commands from Discord.
+
+### Supported commands
+
+| Command | Description |
+|---------|-------------|
+| `/link <username>` | Link your Discord account to a web app user |
+| `/roll <expression>` | Roll dice, e.g. `2d6+3`, `d20` |
+| `/character view` | View your character sheet as an embed |
+| `/character hp <amount>` | Apply HP change (+heal / -damage) |
+| `/loot view` | View party money and items |
+| `/loot add <name> <tag>` | Add an item to party loot |
+| `/loot remove <name>` | Remove an item by name (partial match) |
+| `/loot money <coin> <amount>` | Update a party coin denomination |
+
+### Setup
+
+1. Create a Discord application and bot at the [Discord Developer Portal](https://discord.com/developers/applications).
+2. Generate a long random string for the API key, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+3. Set `BOT_API_KEY=<that-key>` in the **web app** environment (or a `.env` file with dotenv).
+4. Copy `bot/.env.example` to `bot/.env` and fill in `BOT_TOKEN`, `CLIENT_ID`, `GUILD_ID`, and the same `BOT_API_KEY`.
+5. Install bot dependencies: `cd bot && npm install`
+6. Register slash commands once: `node bot/deploy-commands.js`
+7. Start the web app: `npm start`
+8. Start the bot: `node bot/index.js`
+
+Each Discord user must run `/link <username>` once to connect their account to their web app user before using character or loot commands.
 
 ## Documentation
 
