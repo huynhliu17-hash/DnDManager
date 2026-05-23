@@ -176,7 +176,7 @@ async function loadCharacter(id) {
   // Populate text/number fields
   const textFields = [
     'character_name','class_level','background','player_name','race','alignment',
-    'experience_points','inspiration','proficiency_bonus',
+    'experience_points','inspiration','proficiency_bonus','rage_uses','superiority_dice',
     'strength','dexterity','constitution','intelligence','wisdom','charisma',
     'armor_class','initiative','speed','max_hp','current_hp','temp_hp','hit_dice',
     'cp','sp','ep','gp','pp','equipment',
@@ -274,7 +274,7 @@ async function saveCharacter() {
   // Text / number fields
   const fields = [
     'character_name','class_level','background','player_name','race','alignment',
-    'experience_points','inspiration','proficiency_bonus',
+    'experience_points','inspiration','proficiency_bonus','rage_uses','superiority_dice',
     'strength','dexterity','constitution','intelligence','wisdom','charisma',
     'armor_class','initiative','speed','max_hp','current_hp','temp_hp','hit_dice',
     'cp','sp','ep','gp','pp','equipment',
@@ -742,7 +742,7 @@ async function loadPartyCharacter(userId, charId, playerName) {
 
   const textFields = [
     'character_name','class_level','background','player_name','race','alignment',
-    'experience_points','inspiration','proficiency_bonus',
+    'experience_points','inspiration','proficiency_bonus','rage_uses','superiority_dice',
     'strength','dexterity','constitution','intelligence','wisdom','charisma',
     'armor_class','initiative','speed','max_hp','current_hp','temp_hp','hit_dice',
     'cp','sp','ep','gp','pp','equipment',

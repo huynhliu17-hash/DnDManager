@@ -25,9 +25,15 @@ bot/
     cond.js           — /cond add · remove · get · tick: manage conditions on any party character
     loot.js           — /loot view · add · remove · money
     party.js          — /party: shows all linked members' character name, HP bar, and active conditions
+    lookup.js         — /lookup spell|feat|feature <name>: 5e API reference lookup with autocomplete
+  scripts/
+    seed-dnd-index.js — one-time script: fetches 5e API name lists → data/dnd5e-index.json
+  lib/
+    dnd5e.js          — fuzzySearch(type, query): filter cached index; fetchDetail(url): GET 5e API detail
   data/
     links.json        — {discordUserId → webAppUserId} map; runtime file, gitignored
     active_sheets.json — {discordUserId → characterSheetId} map; runtime file, gitignored
+    dnd5e-index.json  — cached spell/feat/feature name lists from 5e API; gitignored; regenerate with seed script
 ```
 
 ## Environment Variables
@@ -52,6 +58,14 @@ Linking is done with `/link` and stored in `data/links.json`. `getWebAppUserId(d
 2. Add a one-line entry to the file map above and to `docs/stack-files.md` in the root project.
 3. Run `node deploy-commands.js` to register it with Discord before testing.
 
+## Setup: 5e Index
+
+Before starting the bot for the first time (and whenever you want to refresh spell/feat/feature data), run:
+```
+node scripts/seed-dnd-index.js
+```
+This fetches name lists from `https://www.dnd5eapi.co` and writes `data/dnd5e-index.json`. Requires Node 18+ for the built-in `fetch` API.
+
 ## Command Reference
 
 | Command | Visibility | Description |
@@ -71,6 +85,9 @@ Linking is done with `/link` and stored in `data/links.json`. `getWebAppUserId(d
 | `/loot remove <name>` | ephemeral | Remove a loot item (partial match) |
 | `/loot money <add\|subtract> <coin> <amount>` | ephemeral | Adjust party money |
 | `/party` | public | All linked members: HP bar + active conditions |
+| `/lookup spell <name>` | public | 5e spell reference (autocomplete) |
+| `/lookup feat <name>` | public | 5e feat reference (autocomplete) |
+| `/lookup feature <name>` | public | 5e class feature reference (autocomplete) |
 
 ## Data Formats
 

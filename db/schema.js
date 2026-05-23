@@ -92,6 +92,12 @@ module.exports = function initSchema(db) {
   if (!csColumns.includes('conditions')) {
     db.exec(`ALTER TABLE character_sheets ADD COLUMN conditions TEXT DEFAULT '[]'`);
   }
+  if (!csColumns.includes('rage_uses')) {
+    db.exec(`ALTER TABLE character_sheets ADD COLUMN rage_uses INTEGER DEFAULT 0`);
+  }
+  if (!csColumns.includes('superiority_dice')) {
+    db.exec(`ALTER TABLE character_sheets ADD COLUMN superiority_dice INTEGER DEFAULT 0`);
+  }
 
   const userCols = db.prepare('PRAGMA table_info(users)').all();
   const pwCol = userCols.find(c => c.name === 'password_hash');

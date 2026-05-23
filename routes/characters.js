@@ -6,7 +6,7 @@ const router = express.Router();
 
 const ALLOWED_FIELDS = [
   'character_name','class_level','background','player_name','race','alignment','experience_points',
-  'inspiration','proficiency_bonus',
+  'inspiration','proficiency_bonus','rage_uses','superiority_dice',
   'strength','dexterity','constitution','intelligence','wisdom','charisma',
   'save_str','save_dex','save_con','save_int','save_wis','save_cha',
   'skill_acrobatics','skill_animal_handling','skill_arcana','skill_athletics','skill_deception',
