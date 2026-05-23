@@ -1,18 +1,35 @@
-// execute(interaction) — /character: view · hp · spellslots · conditions add/remove/get
+// execute(interaction) — /char: view · hp · slots · select
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { api } = require('../lib/api');
-const { getWebAppUserId } = require('../lib/links');
+const { getWebAppUserId, getActiveSheetId, setActiveSheetId } = require('../lib/links');
+
+function resolveSheet(sheets, discordId) {
+  const activeId = getActiveSheetId(discordId);
+  if (activeId) {
+    const found = sheets.find(s => String(s.id) === String(activeId));
+    if (found) return found;
+  }
+  return sheets[0];
+}
 
 const LEVEL_NAMES = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('character')
+    .setName('char')
     .setDescription('View or update your character')
     .addSubcommand(sub =>
       sub.setName('view')
         .setDescription('View your character sheet'))
+    .addSubcommand(sub =>
+      sub.setName('select')
+        .setDescription('Set your active character sheet')
+        .addIntegerOption(opt =>
+          opt.setName('number')
+            .setDescription('Character number from the list (omit to list all)')
+            .setRequired(false)
+            .setMinValue(1)))
     .addSubcommand(sub =>
       sub.setName('hp')
         .setDescription('Apply HP change (+heal / -damage)')
@@ -21,7 +38,7 @@ module.exports = {
             .setDescription('Amount to heal (+) or damage (-)')
             .setRequired(true)))
     .addSubcommand(sub =>
-      sub.setName('spellslots')
+      sub.setName('slots')
         .setDescription('Use or recover a spell slot')
         .addIntegerOption(opt =>
           opt.setName('level')
@@ -36,31 +53,7 @@ module.exports = {
             .addChoices(
               { name: 'Use (expend)', value: 'use' },
               { name: 'Recover', value: 'recover' },
-            )))
-    .addSubcommandGroup(group =>
-      group.setName('conditions')
-        .setDescription('Manage active conditions')
-        .addSubcommand(sub =>
-          sub.setName('add')
-            .setDescription('Add a condition')
-            .addStringOption(opt =>
-              opt.setName('name')
-                .setDescription('Condition name (e.g. Poisoned, Stunned, Prone)')
-                .setRequired(true))
-            .addStringOption(opt =>
-              opt.setName('duration')
-                .setDescription('How long the condition lasts (e.g. 1 hour, 3 rounds, until save)')
-                .setRequired(true)))
-        .addSubcommand(sub =>
-          sub.setName('remove')
-            .setDescription('Remove a condition')
-            .addStringOption(opt =>
-              opt.setName('name')
-                .setDescription('Condition name (partial match)')
-                .setRequired(true)))
-        .addSubcommand(sub =>
-          sub.setName('get')
-            .setDescription('Show all active conditions'))),
+            ))),
 
   async execute(interaction) {
     const userId = getWebAppUserId(interaction.user.id);
@@ -71,85 +64,44 @@ module.exports = {
       });
     }
 
-    const group = interaction.options.getSubcommandGroup(false);
     const sub = interaction.options.getSubcommand();
 
-    // ── conditions ───────────────────────────────────────────────
-    if (group === 'conditions') {
-      await interaction.deferReply({ ephemeral: sub !== 'get' });
-
+    // ── select ───────────────────────────────────────────────────
+    if (sub === 'select') {
+      await interaction.deferReply({ ephemeral: true });
       const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
-      if (!sheets.length) return interaction.editReply('No character found for your account.');
-      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
+      if (!sheets.length) return interaction.editReply('No characters found for your account.');
 
-      let conditions;
-      try { conditions = JSON.parse(sheet.conditions || '[]'); } catch { conditions = []; }
+      const number = interaction.options.getInteger('number');
 
-      if (sub === 'add') {
-        const name = interaction.options.getString('name');
-        const duration = interaction.options.getString('duration');
-
-        const idx = conditions.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
-        if (idx !== -1) {
-          conditions[idx] = { name, duration };
-        } else {
-          conditions.push({ name, duration });
-        }
-
-        await api(`/api/characters/${sheets[0].id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ conditions: JSON.stringify(conditions) }),
-        }, userId);
-
-        return interaction.editReply(`Added condition **${name}** — ${duration}.`);
+      if (number === null) {
+        const activeId = getActiveSheetId(interaction.user.id);
+        const list = sheets.map((s, i) => {
+          const active = String(s.id) === String(activeId) ? ' ✓' : '';
+          return `**${i + 1}.** ${s.character_name || 'Unnamed Character'}${active}`;
+        }).join('\n');
+        return interaction.editReply(`Your characters:\n${list}\n\nUse \`/char select <number>\` to switch.`);
       }
 
-      if (sub === 'remove') {
-        const query = interaction.options.getString('name').toLowerCase();
-        const matches = conditions.filter(c => c.name.toLowerCase().includes(query));
-
-        if (!matches.length) return interaction.editReply(`No condition matching \`${query}\` found.`);
-        if (matches.length > 1) {
-          return interaction.editReply(`Multiple matches — be more specific:\n${matches.map(c => `• ${c.name}`).join('\n')}`);
-        }
-
-        conditions = conditions.filter(c => !c.name.toLowerCase().includes(query));
-        await api(`/api/characters/${sheets[0].id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ conditions: JSON.stringify(conditions) }),
-        }, userId);
-
-        return interaction.editReply(`Removed condition **${matches[0].name}**.`);
+      if (number > sheets.length) {
+        return interaction.editReply(`Invalid number. You have ${sheets.length} character(s).`);
       }
 
-      if (sub === 'get') {
-        const embed = new EmbedBuilder()
-          .setTitle(`${sheet.character_name || 'Unnamed Character'} — Conditions`)
-          .setColor(conditions.length ? 0xED4245 : 0x57F287);
-
-        if (conditions.length) {
-          embed.addFields(conditions.map(c => ({
-            name: c.name,
-            value: c.duration || 'No duration set',
-            inline: true,
-          })));
-        } else {
-          embed.setDescription('No active conditions.');
-        }
-
-        return interaction.editReply({ embeds: [embed] });
-      }
+      const chosen = sheets[number - 1];
+      setActiveSheetId(interaction.user.id, chosen.id);
+      return interaction.editReply(`Active character set to **${chosen.character_name || 'Unnamed Character'}**.`);
     }
 
     // ── spellslots ───────────────────────────────────────────────
-    if (sub === 'spellslots') {
+    if (sub === 'slots') {
       const level = interaction.options.getInteger('level');
       const action = interaction.options.getString('action');
       await interaction.deferReply();
 
       const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
       if (!sheets.length) return interaction.editReply('No character found for your account.');
-      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
+      const active = resolveSheet(sheets, interaction.user.id);
+      const sheet = await api(`/api/players/${userId}/characters/${active.id}`, {}, userId);
 
       let slots;
       try { slots = JSON.parse(sheet.spell_slots || '[]'); } catch { slots = []; }
@@ -175,7 +127,7 @@ module.exports = {
         slot.pips = Array(total).fill(false).map((_, i) => i < filled - 1);
       }
 
-      await api(`/api/characters/${sheets[0].id}`, {
+      await api(`/api/characters/${active.id}`, {
         method: 'PUT',
         body: JSON.stringify({ spell_slots: JSON.stringify(slots) }),
       }, userId);
@@ -199,7 +151,8 @@ module.exports = {
       await interaction.deferReply();
       const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
       if (!sheets.length) return interaction.editReply('No character found for your account.');
-      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
+      const active = resolveSheet(sheets, interaction.user.id);
+      const sheet = await api(`/api/players/${userId}/characters/${active.id}`, {}, userId);
 
       const embed = new EmbedBuilder()
         .setTitle(sheet.character_name || 'Unnamed Character')
@@ -226,13 +179,14 @@ module.exports = {
 
       const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
       if (!sheets.length) return interaction.editReply('No character found for your account.');
-      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
+      const active = resolveSheet(sheets, interaction.user.id);
+      const sheet = await api(`/api/players/${userId}/characters/${active.id}`, {}, userId);
 
       const oldHp = sheet.current_hp ?? 0;
       const maxHp = sheet.max_hp ?? 0;
       const newHp = Math.min(maxHp, Math.max(0, oldHp + amount));
 
-      await api(`/api/characters/${sheets[0].id}`, {
+      await api(`/api/characters/${active.id}`, {
         method: 'PUT',
         body: JSON.stringify({ current_hp: newHp }),
       }, userId);

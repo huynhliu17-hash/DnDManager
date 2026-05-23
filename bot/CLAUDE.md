@@ -15,17 +15,19 @@ bot/
   package.json        — dependencies: discord.js, dotenv
   lib/
     api.js            — api(path, options, targetUserId): fetch wrapper; injects BOT_API_KEY + x-target-user-id header
-    links.js          — getWebAppUserId(discordId) / setLink(discordId, userId) / verifyCredentials(username, password)
-                        reads/writes data/links.json; verifyCredentials hits /api/bot/verify-credentials
+    links.js          — getWebAppUserId / setLink / getActiveSheetId / setActiveSheetId / verifyCredentials
+                        reads/writes data/links.json + data/active_sheets.json; verifyCredentials hits /api/bot/verify-credentials
     dice.js           — parseDiceExpr(expr): parses "2d6+3" → {diceType, count, modifier} or null
   commands/
     link.js           — /link <username> [password]: links Discord ID to web app account; writes links.json
     roll.js           — /roll <expression>: parses dice expr, calls POST /api/dice/roll, shows result publicly
-    character.js      — /character view · hp · spellslots · conditions add/remove/get
+    character.js      — /char view · hp · slots · select
+    cond.js           — /cond add · remove · get · tick: manage conditions on any party character
     loot.js           — /loot view · add · remove · money
     party.js          — /party: shows all linked members' character name, HP bar, and active conditions
   data/
     links.json        — {discordUserId → webAppUserId} map; runtime file, gitignored
+    active_sheets.json — {discordUserId → characterSheetId} map; runtime file, gitignored
 ```
 
 ## Environment Variables
@@ -56,12 +58,14 @@ Linking is done with `/link` and stored in `data/links.json`. `getWebAppUserId(d
 |---------|-----------|-------------|
 | `/link <username> [password]` | ephemeral | Links Discord account to web app user |
 | `/roll <expression>` | public | Rolls dice, shows all results + total |
-| `/character view` | public | Full character sheet embed |
-| `/character hp <amount>` | public | Apply heal (+) or damage (–) to HP |
-| `/character spellslots <level> <use\|recover>` | public | Expend or recover a spell slot; syncs with web app |
-| `/character conditions add <name> <duration>` | ephemeral | Add a condition with duration |
-| `/character conditions remove <name>` | ephemeral | Remove a condition (partial match) |
-| `/character conditions get` | public | Show all active conditions + durations |
+| `/char select [number]` | ephemeral | List characters (no arg) or set active sheet by number |
+| `/char view` | public | Full character sheet embed (active sheet) |
+| `/char hp <amount>` | public | Apply heal (+) or damage (–) to HP (active sheet) |
+| `/char slots <level> <use\|recover>` | public | Expend or recover a spell slot on active sheet |
+| `/cond add <character> <name> <duration>` | ephemeral | Add a condition to a named party character (partial name match) |
+| `/cond remove <character> <name>` | ephemeral | Remove a condition from a named party character |
+| `/cond get [character]` | public | Show conditions for a character, or all party if omitted |
+| `/cond tick` | public | Reduce all numeric condition durations by 1 on all party characters; remove any that hit 0 |
 | `/loot view` | public | Party money and item list |
 | `/loot add <name> <tag>` | ephemeral | Add a loot item |
 | `/loot remove <name>` | ephemeral | Remove a loot item (partial match) |

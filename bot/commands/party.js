@@ -1,21 +1,9 @@
-// getAllLinks()        — read all Discord → web app user ID mappings from links.json
 // hpBar(current, max) — render 8-char block HP bar (e.g. [████░░░░])
 // execute(interaction) — /party: show all linked members' HP bar + active conditions
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { api } = require('../lib/api');
-const fs = require('fs');
-const path = require('path');
-
-const LINKS_FILE = path.join(__dirname, '..', 'data', 'links.json');
-
-function getAllLinks() {
-  try {
-    return JSON.parse(fs.readFileSync(LINKS_FILE, 'utf8'));
-  } catch {
-    return {};
-  }
-}
+const { readLinks, getActiveSheetId } = require('../lib/links');
 
 function hpBar(current, max) {
   if (!max) return '[────────]';
@@ -32,7 +20,7 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const links = getAllLinks();
+    const links = readLinks();
     const entries = Object.entries(links);
 
     if (!entries.length) {
@@ -40,11 +28,13 @@ module.exports = {
     }
 
     const members = [];
-    for (const [, webAppUserId] of entries) {
+    for (const [discordId, webAppUserId] of entries) {
       try {
         const sheets = await api(`/api/players/${webAppUserId}/characters`);
         if (!sheets.length) continue;
-        const sheet = await api(`/api/players/${webAppUserId}/characters/${sheets[0].id}`);
+        const activeId = getActiveSheetId(discordId);
+        const activeRef = (activeId && sheets.find(s => String(s.id) === String(activeId))) || sheets[0];
+        const sheet = await api(`/api/players/${webAppUserId}/characters/${activeRef.id}`);
 
         let conditions;
         try { conditions = JSON.parse(sheet.conditions || '[]'); } catch { conditions = []; }
