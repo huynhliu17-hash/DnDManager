@@ -1,3 +1,5 @@
+// api(path, options, targetUserId) — fetch wrapper; injects bot API key + target user header
+
 const WEBAPP_URL = process.env.WEBAPP_URL || 'http://localhost:3000';
 const BOT_API_KEY = process.env.BOT_API_KEY;
 

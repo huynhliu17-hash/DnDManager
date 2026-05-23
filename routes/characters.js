@@ -15,7 +15,7 @@ const ALLOWED_FIELDS = [
   'skill_sleight_of_hand','skill_stealth','skill_survival',
   'armor_class','initiative','speed','max_hp','current_hp','temp_hp','hit_dice',
   'death_save_success','death_save_fail',
-  'attacks','spells','spell_slots','cp','sp','ep','gp','pp','equipment',
+  'attacks','spells','spell_slots','conditions','cp','sp','ep','gp','pp','equipment',
   'personality_traits','ideals','bonds','flaws','features_traits',
   'backstory','allies_organizations','additional_features','treasure'
 ];

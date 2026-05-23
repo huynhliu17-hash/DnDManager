@@ -9,5 +9,6 @@
 | API Routes | [`docs/routes.md`](docs/routes.md) | all routes, methods, auth requirements, ordering constraints |
 | Auth Model | [`docs/auth.md`](docs/auth.md) | session model, middleware, page access policy |
 | Frontend | [`docs/frontend.md`](docs/frontend.md) | per-file state variables, data attribute conventions, notable implementation details |
+| Discord Bot | [`bot/CLAUDE.md`](bot/CLAUDE.md) | bot file map, env vars, auth model, command reference, data formats |
 
 **If a domain doc and the actual code disagree, trust the code and update the doc.**

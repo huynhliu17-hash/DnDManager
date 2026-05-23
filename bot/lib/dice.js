@@ -1,3 +1,5 @@
+// parseDiceExpr(expr) — parse "2d6+3" → {diceType, count, modifier} or null if invalid
+
 const VALID_DICE = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
 
 // Parses "2d6+3", "d20", "1d8-1" etc.

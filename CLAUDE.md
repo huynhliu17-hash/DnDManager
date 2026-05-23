@@ -11,8 +11,9 @@ See `docs/` for the authoritative project reference, organized by domain:
 | API Routes | `docs/routes.md` | routes, methods, auth, ordering constraints |
 | Auth Model | `docs/auth.md` | session model, middleware, page access policy |
 | Frontend | `docs/frontend.md` | state variables, data attributes, notable details |
+| Discord Bot | `bot/CLAUDE.md` | bot file map, env vars, auth model, command reference, data formats |
 
-**When looking for any project information, grep `docs/` for the relevant domain file first.** `PROJECT_STRUCTURE.md` is the index — start there if unsure which file to grep.
+**Always grep first** — for project info, grep `docs/` (use `PROJECT_STRUCTURE.md` as the index if unsure which file); for code, use function index comments at the top of each file to locate the exact lines before reading.
 
 **Keep domain docs up to date:**
 

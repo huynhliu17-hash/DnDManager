@@ -1,3 +1,5 @@
+// execute(interaction) — /roll: parse dice expr, POST /api/dice/roll, reply with results
+
 const { SlashCommandBuilder } = require('discord.js');
 const { api } = require('../lib/api');
 const { parseDiceExpr } = require('../lib/dice');

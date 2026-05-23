@@ -1,3 +1,9 @@
+// readLinks()                           — read data/links.json; returns {} on missing/corrupt
+// writeLinks(links)                     — write data/links.json
+// getWebAppUserId(discordId)            — look up web app user ID for a Discord ID
+// setLink(discordId, webAppUserId)      — save Discord → web app user ID mapping
+// verifyCredentials(username, password) — POST /api/bot/verify-credentials
+
 const fs = require('fs');
 const path = require('path');
 const { api } = require('./api');

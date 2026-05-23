@@ -19,7 +19,7 @@
 | GET | /api/characters | list: id, character_name, class_level, race, updated_at |
 | POST | /api/characters | create empty sheet, return full row |
 | GET | /api/characters/:id | full sheet, 404 if not owned |
-| PUT | /api/characters/:id | partial update via ALLOWED_FIELDS, sets updated_at; `requireBotOrAuth`; accepts `x-target-user-id` header when bot is caller |
+| PUT | /api/characters/:id | partial update via ALLOWED_FIELDS, sets updated_at; `requireBotOrAuth`; accepts `x-target-user-id` header when bot is caller; ALLOWED_FIELDS includes `conditions` (JSON string) |
 | DELETE | /api/characters/:id | 404 if not owned |
 
 ## Monsters (`routes/monsters.js`, mounted at `/api/monsters`)

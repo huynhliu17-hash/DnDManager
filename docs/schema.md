@@ -40,6 +40,7 @@
 | attacks | TEXT DEFAULT '[]' | JSON: `[{name,bonus,damage}]` |
 | spells | TEXT DEFAULT '[]' | JSON: `[{name,level,notes,description,custom}]` |
 | spell_slots | TEXT DEFAULT '[]' | JSON: 9 items `[{pips:[bool×4]}]` levels 1–9 (array index 0–8, use `level-1`); *(migration)* — not in initial CREATE TABLE |
+| conditions | TEXT DEFAULT '[]' | JSON: `[{name:string, duration:string}]` active conditions; *(migration)* — not in initial CREATE TABLE |
 | cp, sp, ep, gp, pp | INTEGER DEFAULT 0 | |
 | equipment, personality_traits, ideals, bonds, flaws, features_traits | TEXT DEFAULT '' | |
 | backstory, allies_organizations, additional_features, treasure | TEXT DEFAULT '' | |

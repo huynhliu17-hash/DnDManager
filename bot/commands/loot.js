@@ -1,3 +1,6 @@
+// applySubtract(current, currency, amount) — deduct coins with cross-denomination change; returns null if insufficient
+// execute(interaction)                     — /loot: view · add · remove · money
+
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { api } = require('../lib/api');
 

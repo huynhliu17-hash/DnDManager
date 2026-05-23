@@ -89,6 +89,9 @@ module.exports = function initSchema(db) {
   if (!csColumns.includes('spell_slots')) {
     db.exec(`ALTER TABLE character_sheets ADD COLUMN spell_slots TEXT DEFAULT '[]'`);
   }
+  if (!csColumns.includes('conditions')) {
+    db.exec(`ALTER TABLE character_sheets ADD COLUMN conditions TEXT DEFAULT '[]'`);
+  }
 
   const userCols = db.prepare('PRAGMA table_info(users)').all();
   const pwCol = userCols.find(c => c.name === 'password_hash');

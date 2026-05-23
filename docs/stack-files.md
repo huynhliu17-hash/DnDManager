@@ -51,8 +51,9 @@ bot/                    — Discord bot (separate Node process, own package.json
   commands/
     roll.js             — /roll <expression>
     link.js             — /link <username>
-    character.js        — /character view · /character hp <amount>
+    character.js        — /character view · hp · spellslots · conditions add/remove/get
     loot.js             — /loot view · add · remove · money
+    party.js            — /party (all linked members' HP + conditions)
   data/
     links.json          — {discordUserId → webAppUserId} (runtime, gitignored)
 docs/                   — domain documentation (this directory)
