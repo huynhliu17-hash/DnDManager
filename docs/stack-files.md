@@ -51,11 +51,12 @@ bot/                    — Discord bot (separate Node process, own package.json
   commands/
     roll.js             — /roll <expression>
     link.js             — /link <username>
-    character.js        — /character view · hp · spellslots · conditions add/remove/get
+    character.js        — /char view · hp · slots · select · create (wizard); customIdPrefix 'cc'
     cond.js             — /cond add · remove · get · tick
     loot.js             — /loot view · add · remove · money
     party.js            — /party (all linked members' HP + conditions)
     lookup.js           — /lookup spell|feat|feature <name> (5e API reference, autocomplete)
+    dndcommands.js      — /dndcommands: list all bot commands with one-line descriptions (ephemeral)
   scripts/
     seed-dnd-index.js   — fetches 5e API name lists → data/dnd5e-index.json (run once)
   lib/
