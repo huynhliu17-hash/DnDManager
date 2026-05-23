@@ -91,10 +91,15 @@ A separate Discord bot lives in `bot/`. It runs as a second Node process alongsi
 | `/roll <expression>` | Roll dice, e.g. `2d6+3`, `d20` |
 | `/character view` | View your character sheet as an embed |
 | `/character hp <amount>` | Apply HP change (+heal / -damage) |
+| `/character spellslots <level> <use\|recover>` | Expend or recover a spell slot |
+| `/character conditions add <name> <duration>` | Add an active condition |
+| `/character conditions remove <name>` | Remove a condition (partial match) |
+| `/character conditions get` | Show all active conditions |
 | `/loot view` | View party money and items |
 | `/loot add <name> <tag>` | Add an item to party loot |
 | `/loot remove <name>` | Remove an item by name (partial match) |
-| `/loot money <coin> <amount>` | Update a party coin denomination |
+| `/loot money <add\|subtract> <coin> <amount>` | Adjust a party coin denomination |
+| `/party` | All linked members' HP bar and active conditions |
 
 ### Setup
 
@@ -104,8 +109,8 @@ A separate Discord bot lives in `bot/`. It runs as a second Node process alongsi
 4. Copy `bot/.env.example` to `bot/.env` and fill in `BOT_TOKEN`, `CLIENT_ID`, `GUILD_ID`, and the same `BOT_API_KEY`.
 5. Install bot dependencies: `cd bot && npm install`
 6. Register slash commands once: `node bot/deploy-commands.js`
-7. Start the web app: `npm start`
-8. Start the bot: `node bot/index.js`
+7. Start both together from the project root: `npm run dev`
+   Or separately: `npm start` (web app) and `node bot/index.js` (bot)
 
 Each Discord user must run `/link <username>` once to connect their account to their web app user before using character or loot commands.
 
@@ -120,3 +125,4 @@ Detailed reference docs live in `docs/`:
 | `docs/routes.md` | All API routes with methods and auth |
 | `docs/auth.md` | Session model and page access policy |
 | `docs/frontend.md` | Frontend state variables and notable details |
+| `bot/CLAUDE.md` | Bot file map, env vars, auth model, command reference |
