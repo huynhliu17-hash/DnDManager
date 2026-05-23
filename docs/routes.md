@@ -66,3 +66,13 @@
 | GET | /api/players | other registered users; guests get `[]` |
 | GET | /api/players/:userId/characters | list chars for any user; returns `id, character_name, class_level, race` (no `updated_at`) |
 | GET | /api/players/:userId/characters/:charId | full sheet, no ownership check |
+
+## Pages (`routes/pages.js`, mounted at `/`)
+| method | path | auth | notes |
+|--------|------|------|-------|
+| GET | / | requireAuth | home page |
+| GET | /character-sheet | requireAuth | character sheet |
+| GET | /dice-roll | requireAuth | dice roller |
+| GET | /loot | requireAuth | party loot |
+| GET | /monsters | requireAdmin | monster tracker |
+| GET | /history | requireAdmin | change history |

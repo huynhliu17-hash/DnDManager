@@ -1,10 +1,10 @@
 const express = require('express');
 const db = require('../db');
-const { requireBotOrAuth } = require('../middleware/auth');
+const { requireBotOrAuth, callerId } = require('../middleware/auth');
 const router = express.Router();
 
 router.get('/', requireBotOrAuth, (req, res) => {
-  const userId = String(req.session.userId);
+  const userId = callerId(req);
   if (userId === 'guest') return res.json([]);
   const rows = db.prepare('SELECT id, username FROM users WHERE id != ? ORDER BY username').all(userId);
   res.json(rows);

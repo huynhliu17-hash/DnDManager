@@ -30,11 +30,11 @@ module.exports = {
 
     if (sub === 'view') {
       await interaction.deferReply();
-      const sheets = await api(`/api/party/${userId}/characters`, {}, userId);
+      const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
       if (!sheets.length) {
         return interaction.editReply('No character found for your account.');
       }
-      const sheet = await api(`/api/party/${userId}/characters/${sheets[0].id}`, {}, userId);
+      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
 
       const embed = new EmbedBuilder()
         .setTitle(sheet.character_name || 'Unnamed Character')
@@ -58,11 +58,11 @@ module.exports = {
       const amount = interaction.options.getInteger('amount');
       await interaction.deferReply();
 
-      const sheets = await api(`/api/party/${userId}/characters`, {}, userId);
+      const sheets = await api(`/api/players/${userId}/characters`, {}, userId);
       if (!sheets.length) {
         return interaction.editReply('No character found for your account.');
       }
-      const sheet = await api(`/api/party/${userId}/characters/${sheets[0].id}`, {}, userId);
+      const sheet = await api(`/api/players/${userId}/characters/${sheets[0].id}`, {}, userId);
 
       const oldHp = sheet.current_hp ?? 0;
       const maxHp = sheet.max_hp ?? 0;

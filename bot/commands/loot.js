@@ -2,6 +2,39 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { api } = require('../lib/api');
 
 const COIN_NAMES = { pp: 'Platinum', gp: 'Gold', ep: 'Electrum', sp: 'Silver', cp: 'Copper' };
+const COIN_TO_CP = { cp: 1, sp: 10, ep: 50, gp: 100, pp: 1000 };
+const COIN_ORDER = ['cp', 'sp', 'ep', 'gp', 'pp'];
+
+function applySubtract(current, currency, amount) {
+  const costCP = amount * COIN_TO_CP[currency];
+  const totalCP = COIN_ORDER.reduce((sum, c) => sum + current[c] * COIN_TO_CP[c], 0);
+  if (costCP > totalCP) return null; // insufficient funds
+
+  let remainCP = costCP;
+  const fromSelected = Math.min(current[currency], Math.floor(remainCP / COIN_TO_CP[currency]));
+  current[currency] -= fromSelected;
+  remainCP -= fromSelected * COIN_TO_CP[currency];
+
+  for (const coin of COIN_ORDER) {
+    if (coin === currency || remainCP <= 0) continue;
+    const take = Math.min(current[coin], Math.ceil(remainCP / COIN_TO_CP[coin]));
+    current[coin] -= take;
+    remainCP -= take * COIN_TO_CP[coin];
+  }
+
+  if (remainCP < 0) {
+    let change = Math.abs(remainCP);
+    for (let i = COIN_ORDER.length - 1; i >= 0; i--) {
+      const coin = COIN_ORDER[i];
+      const val = COIN_TO_CP[coin];
+      const count = Math.floor(change / val);
+      if (count > 0) { current[coin] += count; change -= count * val; }
+    }
+    if (change > 0) current.cp += change;
+  }
+
+  return current;
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -39,7 +72,15 @@ module.exports = {
             .setRequired(true)))
     .addSubcommand(sub =>
       sub.setName('money')
-        .setDescription('Update party money')
+        .setDescription('Add or subtract party money')
+        .addStringOption(opt =>
+          opt.setName('action')
+            .setDescription('Add or subtract')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Add', value: 'add' },
+              { name: 'Subtract', value: 'subtract' },
+            ))
         .addStringOption(opt =>
           opt.setName('coin')
             .setDescription('Coin type')
@@ -53,8 +94,9 @@ module.exports = {
             ))
         .addIntegerOption(opt =>
           opt.setName('amount')
-            .setDescription('New amount (replaces current value)')
-            .setRequired(true))),
+            .setDescription('Amount to add or subtract')
+            .setRequired(true)
+            .setMinValue(1))),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
@@ -128,19 +170,32 @@ module.exports = {
     }
 
     if (sub === 'money') {
+      const action = interaction.options.getString('action');
       const coin = interaction.options.getString('coin');
       const amount = interaction.options.getInteger('amount');
       await interaction.deferReply({ ephemeral: true });
 
       const current = await api('/api/loot/money');
-      const updated = { ...current, [coin]: amount };
+      const coinName = COIN_NAMES[coin] || coin;
+      let updated;
+
+      if (action === 'add') {
+        updated = { ...current, [coin]: (current[coin] || 0) + amount };
+      } else {
+        updated = applySubtract({ ...current }, coin, amount);
+        if (!updated) {
+          return interaction.editReply(`Insufficient funds — the party cannot cover ${amount} ${coin}.`);
+        }
+      }
+
       await api('/api/loot/money', {
         method: 'PUT',
         body: JSON.stringify(updated),
       });
 
-      const coinName = COIN_NAMES[coin] || coin;
-      return interaction.editReply(`Updated **${coinName}** to ${amount} ${coin}.`);
+      const totalLine = COIN_ORDER.filter(c => updated[c]).map(c => `${updated[c]} ${c}`).join(' · ') || '0 cp';
+      const sign = action === 'add' ? '+' : '-';
+      return interaction.editReply(`${sign}${amount} ${coin} (${coinName}). Party total: ${totalLine}`);
     }
   },
 };

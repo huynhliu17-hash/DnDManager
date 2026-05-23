@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../db');
-const { requireAuth, requireBotOrAuth } = require('../middleware/auth');
+const { requireAuth, requireBotOrAuth, callerId, callerName } = require('../middleware/auth');
 const { logHistory } = require('../lib/history');
 const router = express.Router();
 
@@ -46,9 +46,9 @@ router.get('/:id', requireAuth, (req, res) => {
 });
 
 router.put('/:id', requireBotOrAuth, (req, res) => {
-  const userId = req.session.userId === 'bot' && req.headers['x-target-user-id']
+  const userId = req.botCaller && req.headers['x-target-user-id']
     ? String(req.headers['x-target-user-id'])
-    : String(req.session.userId);
+    : callerId(req);
   const old = db.prepare('SELECT * FROM character_sheets WHERE id = ? AND user_id = ?').get(req.params.id, userId);
   if (!old) return res.status(404).json({ error: 'Not found' });
 
@@ -66,7 +66,7 @@ router.put('/:id', requireBotOrAuth, (req, res) => {
     const ov = String(old[f] ?? '');
     const nv = String(updates[f] ?? '');
     if (ov !== nv) {
-      logHistory(req.session.userId, req.session.username, 'update', {
+      logHistory(callerId(req), callerName(req), 'update', {
         item_id: old.id,
         item_name: updates.character_name ?? old.character_name ?? '',
         field: f,

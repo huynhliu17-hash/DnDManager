@@ -26,10 +26,11 @@ function setLink(discordId, webAppUserId) {
   writeLinks(links);
 }
 
-async function resolveUsername(name) {
-  const players = await api('/api/players');
-  const match = players.find(p => p.username.toLowerCase() === name.toLowerCase());
-  return match || null;
+async function verifyCredentials(username, password) {
+  return api('/api/bot/verify-credentials', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
 }
 
-module.exports = { getWebAppUserId, setLink, resolveUsername };
+module.exports = { getWebAppUserId, setLink, verifyCredentials };

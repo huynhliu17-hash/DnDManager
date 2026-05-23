@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "bot": "node bot/index.js",
-    "dev": "concurrently \"node server.js\" \"node bot/index.js\"",
+    "dev": "node bot/deploy-commands.js && concurrently \"node server.js\" \"node bot/index.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

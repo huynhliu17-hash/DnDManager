@@ -1,4 +1,5 @@
 // ── Function Index ────────────────────────────────────────────────────────
+// Auth     logout
 // UI       toggleSidebar  closeSidebar  toggleLore
 // Calc     mod  fmtMod  getAbilityScores  recalc  applyDamage
 // State    loadCharList  createNewCharacter  loadCharacter  updateCharList

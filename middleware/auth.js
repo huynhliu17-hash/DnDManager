@@ -12,11 +12,18 @@ function requireAdmin(req, res, next) {
 function requireBotOrAuth(req, res, next) {
   const key = req.headers['x-bot-api-key'];
   if (key && key === process.env.BOT_API_KEY) {
-    req.session.userId = 'bot';
-    req.session.username = 'Discord Bot';
+    req.botCaller = { userId: 'bot', username: 'Discord Bot' };
     return next();
   }
   return requireAuth(req, res, next);
 }
 
-module.exports = { requireAuth, requireAdmin, requireBotOrAuth };
+function callerId(req) {
+  return req.botCaller ? req.botCaller.userId : String(req.session.userId);
+}
+
+function callerName(req) {
+  return req.botCaller ? req.botCaller.username : (req.session.username || 'Guest');
+}
+
+module.exports = { requireAuth, requireAdmin, requireBotOrAuth, callerId, callerName };

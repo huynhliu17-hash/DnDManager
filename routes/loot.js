@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../db');
-const { requireAuth, requireAdmin, requireBotOrAuth } = require('../middleware/auth');
+const { requireAuth, requireAdmin, requireBotOrAuth, callerId, callerName } = require('../middleware/auth');
 const { logHistory } = require('../lib/history');
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.put('/money', (req, res) => {
   db.prepare(`UPDATE party_money SET ${sets} WHERE id = 1`).run(vals);
   fields.forEach(f => {
     if ((old[f] ?? 0) !== vals[f]) {
-      logHistory(req.session.userId, req.session.username, 'money', {
+      logHistory(callerId(req), callerName(req), 'money', {
         field: f,
         old_val: String(old[f] ?? 0),
         new_val: String(vals[f]),
@@ -51,7 +51,7 @@ router.post('/', (req, res) => {
     VALUES ('', '', '', '', 1, '')
   `).run();
   const row = db.prepare(`SELECT * FROM loot_items WHERE id = ?`).get(result.lastInsertRowid);
-  logHistory(req.session.userId, req.session.username, 'create', {
+  logHistory(callerId(req), callerName(req), 'create', {
     item_id: row.id,
     item_name: row.name,
   });
@@ -73,7 +73,7 @@ router.put('/:id', (req, res) => {
       const ov = String(old[f] ?? '');
       const nv = String(updates[f] ?? '');
       if (ov !== nv) {
-        logHistory(req.session.userId, req.session.username, 'update', {
+        logHistory(callerId(req), callerName(req), 'update', {
           item_id: id,
           item_name: old.name || '',
           field: f,
@@ -90,7 +90,7 @@ router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
   const old = db.prepare(`SELECT name FROM loot_items WHERE id = ?`).get(id);
   db.prepare(`DELETE FROM loot_items WHERE id = ?`).run(id);
-  logHistory(req.session.userId, req.session.username, 'delete', {
+  logHistory(callerId(req), callerName(req), 'delete', {
     item_id: id,
     item_name: old?.name || '',
   });

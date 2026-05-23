@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const db = require('../db');
-const { requireAuth, requireBotOrAuth } = require('../middleware/auth');
+const { requireAuth, requireBotOrAuth, callerId, callerName } = require('../middleware/auth');
 const router = express.Router();
 
 const VALID_DICE = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20, d100: 100 };
@@ -43,8 +43,8 @@ router.post('/roll', requireBotOrAuth, (req, res) => {
 
   const results = Array.from({ length: diceCount }, (_, i) => rollDie(faces, i, seed));
   const total = results.reduce((a, b) => a + b, 0);
-  const userId = String(req.session.userId);
-  const username = req.session.username || 'Guest';
+  const userId = callerId(req);
+  const username = callerName(req);
 
   const row = db.prepare(
     'INSERT INTO dice_rolls (user_id, username, dice_type, dice_count, results, total) VALUES (?, ?, ?, ?, ?, ?)'

@@ -5,8 +5,9 @@
 ## Auth Model
 - `requireAuth` (`middleware/auth.js`): checks `req.session.userId`, redirects to `/login.html` if missing
 - `requireAdmin` (`middleware/auth.js`): same as above + requires `req.session.isAdmin === true`; returns 403 JSON if authenticated but not admin
-- `requireBotOrAuth` (`middleware/auth.js`): accepts a valid `x-bot-api-key` header (checked against `BOT_API_KEY` env var) OR a live session; sets `req.session.userId='bot'` and `req.session.username='Discord Bot'` for the request duration (transient — not persisted). Used on routes the Discord bot needs to call.
-- `userId` stored as string: guest=`'guest'`, users=`String(lastInsertRowid)`, bot=`'bot'`
+- `requireBotOrAuth` (`middleware/auth.js`): accepts a valid `x-bot-api-key` header (checked against `BOT_API_KEY` env var) OR a live session; sets `req.botCaller = { userId: 'bot', username: 'Discord Bot' }` on the request object (does NOT touch `req.session`). Used on routes the Discord bot needs to call.
+- `callerId(req)` / `callerName(req)` (`middleware/auth.js`): helpers used inside routes to read the effective userId/username regardless of whether the caller is the bot (`req.botCaller`) or a normal session (`req.session`).
+- `userId` stored as string: guest=`'guest'`, users=`String(lastInsertRowid)`, bot=`'bot'` (req-level only, never in session)
 - `isAdmin` stored in session as boolean; set on login/register from `users.is_admin`
 - New accounts always have `is_admin = 0`; admin must be granted directly in the DB
 - Exception: `db/schema.js` unconditionally sets `is_admin = 1` for any account with username `'ed'` (case-insensitive) at every startup
