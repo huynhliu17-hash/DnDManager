@@ -17,7 +17,7 @@
 | method | path | notes |
 |--------|------|-------|
 | GET | /api/characters | list: id, character_name, class_level, race, updated_at |
-| POST | /api/characters | create empty sheet, return full row |
+| POST | /api/characters | create empty sheet, return full row; `requireBotOrAuth`; accepts `x-target-user-id` when bot is caller |
 | GET | /api/characters/:id | full sheet, 404 if not owned |
 | PUT | /api/characters/:id | partial update via ALLOWED_FIELDS, sets updated_at; `requireBotOrAuth`; accepts `x-target-user-id` header when bot is caller; ALLOWED_FIELDS includes `conditions` (JSON string) |
 | DELETE | /api/characters/:id | 404 if not owned |

@@ -42,20 +42,30 @@ function spellEmbed(d) {
 }
 
 function featEmbed(d) {
-  const desc = trunc((d.desc || []).join('\n\n'), 4096);
+  // Open5e: desc is a string; dnd5eapi: desc is an array
+  const rawDesc = Array.isArray(d.desc) ? d.desc.join('\n\n') : (d.desc || '');
+  const desc = trunc(rawDesc, 4096);
+
+  // Open5e: prerequisite is a string; dnd5eapi: prerequisites is an array
   let prereqs = 'None';
-  if (d.prerequisites?.length) {
+  if (d.prerequisite) {
+    prereqs = d.prerequisite;
+  } else if (d.prerequisites?.length) {
     prereqs = d.prerequisites.map(p => {
       if (p.type === 'ability-score') return `${p.ability_score?.name || 'Ability'} ${p.minimum_score}+`;
       return p.proficiency?.name || p.spell?.name || p.type || '—';
     }).join(', ');
   }
 
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setTitle(d.name)
     .setColor(COLORS.feat)
-    .setDescription(desc)
+    .setDescription(desc || '—')
     .addFields({ name: 'Prerequisites', value: prereqs });
+
+  if (d.document__title) embed.setFooter({ text: d.document__title });
+
+  return embed;
 }
 
 function featureEmbed(d) {
@@ -100,12 +110,17 @@ module.exports = {
     const nameVal = interaction.options.getString('name');
     await interaction.deferReply();
 
-    // Autocomplete selections pass the URL as the value; plain text needs a lookup
+    // Autocomplete selections pass the URL as the value (starts with /); plain text needs a lookup
     let url;
-    if (nameVal.startsWith('/api/')) {
+    if (nameVal.startsWith('/')) {
       url = nameVal;
     } else {
-      const results = fuzzySearch(TYPE_MAP[sub], nameVal);
+      let results;
+      try {
+        results = fuzzySearch(TYPE_MAP[sub], nameVal);
+      } catch {
+        return interaction.editReply('Lookup index unavailable. Run `node scripts/seed-dnd-index.js` in the bot directory to build it.');
+      }
       if (!results.length) return interaction.editReply(`No ${sub} found matching \`${nameVal}\`.`);
       url = results[0].url;
     }

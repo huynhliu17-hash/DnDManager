@@ -17,12 +17,33 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async interaction => {
+  // ── Autocomplete ──────────────────────────────────────────────
   if (interaction.isAutocomplete()) {
     const cmd = client.commands.get(interaction.commandName);
     if (cmd?.autocomplete) await cmd.autocomplete(interaction).catch(() => {});
     return;
   }
 
+  // ── Buttons & Modals — route by customId prefix ───────────────
+  if (interaction.isButton() || interaction.isModalSubmit()) {
+    const prefix = interaction.customId.split(':')[0];
+    for (const cmd of client.commands.values()) {
+      if (cmd.customIdPrefix === prefix && cmd.handleComponent) {
+        try {
+          await cmd.handleComponent(interaction);
+        } catch (err) {
+          console.error(`Error in component handler (${prefix}):`, err);
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: 'An error occurred. Check bot logs.', ephemeral: true }).catch(() => {});
+          }
+        }
+        return;
+      }
+    }
+    return;
+  }
+
+  // ── Slash commands ────────────────────────────────────────────
   if (!interaction.isChatInputCommand()) return;
   const cmd = client.commands.get(interaction.commandName);
   if (!cmd) return;

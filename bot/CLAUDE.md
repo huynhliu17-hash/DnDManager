@@ -21,11 +21,12 @@ bot/
   commands/
     link.js           — /link <username> [password]: links Discord ID to web app account; writes links.json
     roll.js           — /roll <expression>: parses dice expr, calls POST /api/dice/roll, shows result publicly
-    character.js      — /char view · hp · slots · select
+    character.js      — /char view · hp · slots · select · create; customIdPrefix 'cc'; handleComponent for wizard buttons/modals
     cond.js           — /cond add · remove · get · tick: manage conditions on any party character
     loot.js           — /loot view · add · remove · money
     party.js          — /party: shows all linked members' character name, HP bar, and active conditions
     lookup.js         — /lookup spell|feat|feature <name>: 5e API reference lookup with autocomplete
+    dndcommands.js    — /dndcommands: list all bot commands with one-line descriptions (ephemeral)
   scripts/
     seed-dnd-index.js — one-time script: fetches 5e API name lists → data/dnd5e-index.json
   lib/
@@ -58,6 +59,10 @@ Linking is done with `/link` and stored in `data/links.json`. `getWebAppUserId(d
 2. Add a one-line entry to the file map above and to `docs/stack-files.md` in the root project.
 3. Run `node deploy-commands.js` to register it with Discord before testing.
 
+## Button & Modal Dispatch
+
+`index.js` routes button and modal-submit interactions by the first segment of `customId` (before `:`). To add component handling to a command, export `customIdPrefix` (a short string) and `handleComponent(interaction)` alongside `data` and `execute`. The `cc` prefix is reserved for the `/char create` wizard (`character.js`).
+
 ## Setup: 5e Index
 
 Before starting the bot for the first time (and whenever you want to refresh spell/feat/feature data), run:
@@ -72,6 +77,7 @@ This fetches name lists from `https://www.dnd5eapi.co` and writes `data/dnd5e-in
 |---------|-----------|-------------|
 | `/link <username> [password]` | ephemeral | Links Discord account to web app user |
 | `/roll <expression>` | public | Rolls dice, shows all results + total |
+| `/char create` | ephemeral | Step-by-step wizard to create a new character sheet (8 steps, all skippable) |
 | `/char select [number]` | ephemeral | List characters (no arg) or set active sheet by number |
 | `/char view` | public | Full character sheet embed (active sheet) |
 | `/char hp <amount>` | public | Apply heal (+) or damage (–) to HP (active sheet) |
@@ -88,6 +94,7 @@ This fetches name lists from `https://www.dnd5eapi.co` and writes `data/dnd5e-in
 | `/lookup spell <name>` | public | 5e spell reference (autocomplete) |
 | `/lookup feat <name>` | public | 5e feat reference (autocomplete) |
 | `/lookup feature <name>` | public | 5e class feature reference (autocomplete) |
+| `/dndcommands` | ephemeral | List all bot commands with one-line descriptions |
 
 ## Data Formats
 

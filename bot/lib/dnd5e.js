@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const INDEX_PATH = path.join(__dirname, '../data/dnd5e-index.json');
-const BASE = 'https://www.dnd5eapi.co';
+const DND5E_BASE = 'https://www.dnd5eapi.co';
+const OPEN5E_BASE = 'https://api.open5e.com';
 
 let _index = null;
 
@@ -25,7 +26,12 @@ function fuzzySearch(type, query, limit = 25) {
 }
 
 async function fetchDetail(url) {
-  const res = await fetch(`${BASE}${url}`);
+  if (url.startsWith('/v1/')) {
+    const res = await fetch(`${OPEN5E_BASE}${url}?format=json`);
+    if (!res.ok) throw new Error(`Open5e API error: ${res.status}`);
+    return res.json();
+  }
+  const res = await fetch(`${DND5E_BASE}${url}`);
   if (!res.ok) throw new Error(`5e API error: ${res.status}`);
   return res.json();
 }

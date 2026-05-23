@@ -26,11 +26,13 @@ router.get('/', requireAuth, (req, res) => {
   res.json(rows);
 });
 
-router.post('/', requireAuth, (req, res) => {
-  const userId = String(req.session.userId);
+router.post('/', requireBotOrAuth, (req, res) => {
+  const userId = req.botCaller && req.headers['x-target-user-id']
+    ? String(req.headers['x-target-user-id'])
+    : callerId(req);
   const result = db.prepare('INSERT INTO character_sheets (user_id) VALUES (?)').run(userId);
   const sheet = db.prepare('SELECT * FROM character_sheets WHERE id = ?').get(result.lastInsertRowid);
-  logHistory(req.session.userId, req.session.username, 'create', {
+  logHistory(callerId(req), callerName(req), 'create', {
     item_id: sheet.id,
     item_name: sheet.character_name || '',
     source: 'sheet',
