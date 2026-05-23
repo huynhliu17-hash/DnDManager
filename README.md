@@ -72,9 +72,10 @@ docs/                   — authoritative domain documentation
 
 ## Running
 
-```
+```bash
 npm install
-npm start   # node server.js → http://localhost:3000
+npm start      # web app only → http://localhost:3000
+npm run dev    # web app + Discord bot together
 ```
 
 No build step required. The database (`data.db`) is created automatically on first run.
