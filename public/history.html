@@ -29,6 +29,21 @@
         <div class="cs-box-title">Change History</div>
         <button type="button" class="btn-secondary loot-refresh-btn" id="btn-refresh" onclick="refreshHistory()">&#x21bb; Refresh</button>
       </div>
+      <div class="history-filter" style="margin-bottom:14px;flex-wrap:wrap;gap:12px;">
+        <span class="filter-label">User:</span>
+        <select id="filter-user" class="filter-select" onchange="applyFilters()">
+          <option value="">All users</option>
+        </select>
+        <span class="filter-label">Action:</span>
+        <select id="filter-action" class="filter-select" onchange="applyFilters()">
+          <option value="">All actions</option>
+          <option value="create">create</option>
+          <option value="update">update</option>
+          <option value="delete">delete</option>
+          <option value="money">money</option>
+        </select>
+        <button type="button" class="btn-secondary" id="btn-clear-filters" onclick="clearFilters()" style="display:none">✕ Clear</button>
+      </div>
       <div class="loot-history-wrap">
         <table class="loot-history-table">
           <thead>
@@ -45,6 +60,7 @@
         </table>
         <p class="loot-empty hidden" id="history-empty">No history yet.</p>
       </div>
+      <div id="history-pagination" class="pagination"></div>
     </div>
   </main>
 

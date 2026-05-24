@@ -10,6 +10,7 @@
 | POST | /api/login | password optional if account has no hash |
 | POST | /api/logout | destroys session |
 | GET | /api/me | returns `{username, guest, admin}` or 401 |
+| POST | /api/bot/verify-credentials | bot-only (x-bot-api-key required); validates username+password; returns `{valid, requiresPassword, userId, username}` |
 
 > `/api/me` returns 401 JSON (not a redirect) — it uses a manual session check, not `requireAuth` middleware.
 
@@ -47,7 +48,7 @@
 > All loot routes use `requireBotOrAuth` (bot or logged-in user). Loot and character PUT routes write audit rows via `logHistory` (`lib/history.js`).
 | method | path | notes |
 |--------|------|-------|
-| GET | /api/loot/history | admin-only; last 500 `loot_history` rows newest-first |
+| GET | /api/loot/history | admin-only; paginated `loot_history` newest-first; query `?page=N&user=NAME&action=ACTION` (all optional); returns `{ rows, total, page, pages, users }` with 50 rows/page; `users` = distinct usernames for filter dropdown |
 | GET | /api/loot/money | returns `{cp,sp,ep,gp,pp}` |
 | PUT | /api/loot/money | body: `{cp,sp,ep,gp,pp}`; updates single party_money row; logs changed coins |
 | GET | /api/loot | all loot items ordered by created_at |

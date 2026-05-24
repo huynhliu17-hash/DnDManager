@@ -1923,6 +1923,26 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .loot-money-field input:focus { border-color: var(--accent2); }
 
+.money-arrow {
+  width: 80px;
+  padding: 2px 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.money-arrow:hover {
+  background: var(--accent2);
+  color: #fff;
+  border-color: var(--accent2);
+}
+.money-arrow:active { opacity: 0.75; }
+
 .loot-money-field label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -2083,6 +2103,37 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .loot-empty.hidden { display: none; }
 
+/* ── Pagination ─────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  padding: 16px 0 4px;
+}
+.pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-muted, #aaa);
+}
+.pagination-btn {
+  min-width: 80px;
+}
+.pagination-jump-input {
+  width: 56px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  padding: 5px 8px;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.pagination-jump-input::-webkit-outer-spin-button,
+.pagination-jump-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pagination-jump-input:focus { outline: none; border-color: var(--accent2); }
+
 .loot-txn-row {
   display: flex;
   align-items: center;
@@ -2139,4 +2190,5 @@ input[type="number"] { -moz-appearance: textfield; }
 @media (max-width: 600px) {
   .loot-money-grid { gap: 8px; }
   .loot-money-field input { width: 64px; }
+  .money-arrow { width: 64px; }
 }

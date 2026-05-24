@@ -90,4 +90,5 @@
 | field | TEXT | for `update`: which field changed; for `money`: which coin (cp/sp/…) |
 | old_val | TEXT | previous value (NULL for create) |
 | new_val | TEXT | new value (NULL for delete) |
+| source | TEXT NOT NULL DEFAULT 'loot' | `'loot'` \| `'sheet'`; identifies which subsystem wrote the row; *(migration)* |
 | ts | DATETIME | UTC timestamp (SQLite CURRENT_TIMESTAMP) |

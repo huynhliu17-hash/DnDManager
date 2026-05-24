@@ -1,6 +1,6 @@
 // ── Function Index ──────────────────────────────────────────────────────────
 // Auth     logout
-// Money    loadMoney  scheduleMoneySave  saveMoney  applyMoneyTransaction
+// Money    loadMoney  scheduleMoneySave  adjustMoney  saveMoney  applyMoneyTransaction
 //          showMoneyError  clearMoneyError
 // Items    refreshLoot  loadItems  createItem  removeItem  fieldChange
 //          scheduleItemSave  saveItem
@@ -58,6 +58,12 @@ async function loadMoney() {
 function scheduleMoneySave() {
   clearTimeout(moneyTimer);
   moneyTimer = setTimeout(saveMoney, 800);
+}
+
+function adjustMoney(coin, delta) {
+  const el = document.getElementById('money-' + coin);
+  el.value = Math.max(0, (parseInt(el.value) || 0) + delta);
+  scheduleMoneySave();
 }
 
 function saveMoney() {

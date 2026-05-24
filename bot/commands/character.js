@@ -569,20 +569,28 @@ module.exports = {
       const active = resolveSheet(sheets, interaction.user.id);
       const sheet = await api(`/api/players/${userId}/characters/${active.id}`, {}, userId);
 
+      const viewFields = [
+        { name: 'Race / Class', value: `${sheet.race || '—'} / ${sheet.class_level || '—'}`, inline: true },
+        { name: 'AC', value: String(sheet.armor_class ?? '—'), inline: true },
+        { name: 'HP', value: `${sheet.current_hp ?? 0} / ${sheet.max_hp ?? 0}${sheet.temp_hp ? ` (+${sheet.temp_hp} temp)` : ''}`, inline: true },
+        { name: 'STR', value: String(sheet.strength ?? '—'), inline: true },
+        { name: 'DEX', value: String(sheet.dexterity ?? '—'), inline: true },
+        { name: 'CON', value: String(sheet.constitution ?? '—'), inline: true },
+        { name: 'INT', value: String(sheet.intelligence ?? '—'), inline: true },
+        { name: 'WIS', value: String(sheet.wisdom ?? '—'), inline: true },
+        { name: 'CHA', value: String(sheet.charisma ?? '—'), inline: true },
+      ];
+      if (sheet.rage_uses > 0) {
+        viewFields.push({ name: 'Rage Uses', value: String(sheet.rage_uses), inline: true });
+      }
+      if (sheet.superiority_dice > 0) {
+        viewFields.push({ name: 'Superiority Dice', value: String(sheet.superiority_dice), inline: true });
+      }
+
       const embed = new EmbedBuilder()
         .setTitle(sheet.character_name || 'Unnamed Character')
         .setColor(0x5865F2)
-        .addFields(
-          { name: 'Race / Class', value: `${sheet.race || '—'} / ${sheet.class_level || '—'}`, inline: true },
-          { name: 'AC', value: String(sheet.armor_class ?? '—'), inline: true },
-          { name: 'HP', value: `${sheet.current_hp ?? 0} / ${sheet.max_hp ?? 0}${sheet.temp_hp ? ` (+${sheet.temp_hp} temp)` : ''}`, inline: true },
-          { name: 'STR', value: String(sheet.strength ?? '—'), inline: true },
-          { name: 'DEX', value: String(sheet.dexterity ?? '—'), inline: true },
-          { name: 'CON', value: String(sheet.constitution ?? '—'), inline: true },
-          { name: 'INT', value: String(sheet.intelligence ?? '—'), inline: true },
-          { name: 'WIS', value: String(sheet.wisdom ?? '—'), inline: true },
-          { name: 'CHA', value: String(sheet.charisma ?? '—'), inline: true },
-        );
+        .addFields(...viewFields);
 
       return interaction.editReply({ embeds: [embed] });
     }

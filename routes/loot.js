@@ -9,11 +9,28 @@ const ALLOWED_FIELDS = ['name', 'tag', 'location', 'value', 'quantity', 'notes']
 router.use(requireBotOrAuth);
 
 router.get('/history', requireAdmin, (req, res) => {
-  const rows = db.prepare(`
+  const PAGE_SIZE = 50;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const filterUser   = req.query.user   || '';
+  const filterAction = req.query.action || '';
+
+  const conditions = [];
+  const params = [];
+  if (filterUser)   { conditions.push('username = ?'); params.push(filterUser); }
+  if (filterAction) { conditions.push('action = ?');   params.push(filterAction); }
+  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+
+  const total = db.prepare(`SELECT COUNT(*) AS cnt FROM loot_history ${where}`).get(...params).cnt;
+  const rows  = db.prepare(`
     SELECT id, username, action, item_id, item_name, field, old_val, new_val, source, ts
-    FROM loot_history ORDER BY ts DESC LIMIT 500
-  `).all();
-  res.json(rows);
+    FROM loot_history ${where} ORDER BY ts DESC LIMIT ? OFFSET ?
+  `).all(...params, PAGE_SIZE, offset);
+
+  const users = db.prepare(`SELECT DISTINCT username FROM loot_history ORDER BY username`).all().map(r => r.username);
+
+  res.json({ rows, total, page, pages: Math.ceil(total / PAGE_SIZE) || 1, users });
 });
 
 router.get('/money', (req, res) => {

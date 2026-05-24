@@ -17,7 +17,7 @@ bot/
     api.js            — api(path, options, targetUserId): fetch wrapper; injects BOT_API_KEY + x-target-user-id header
     links.js          — getWebAppUserId / setLink / getActiveSheetId / setActiveSheetId / verifyCredentials
                         reads/writes data/links.json + data/active_sheets.json; verifyCredentials hits /api/bot/verify-credentials
-    dice.js           — parseDiceExpr(expr): parses "2d6+3" → {diceType, count, modifier} or null
+    dice.js           — parseDiceExpr(expr): parses "2d6+3" or "2d6+3+5-1" → {diceType, count, modifier} or null; sums chained modifiers
   commands/
     link.js           — /link <username> [password]: links Discord ID to web app account; writes links.json
     roll.js           — /roll <expression>: parses dice expr, calls POST /api/dice/roll, shows result publicly
@@ -26,6 +26,7 @@ bot/
     loot.js           — /loot view · add · remove · money
     party.js          — /party: shows all linked members' character name, HP bar, and active conditions
     lookup.js         — /lookup spell|feat|feature <name>: 5e API reference lookup with autocomplete
+    resource.js       — /res rage|sd use|recover|set [amount]: adjust rage uses or superiority dice
     dndcommands.js    — /dndcommands: list all bot commands with one-line descriptions (ephemeral)
   scripts/
     seed-dnd-index.js — one-time script: fetches 5e API name lists → data/dnd5e-index.json
@@ -61,7 +62,12 @@ Linking is done with `/link` and stored in `data/links.json`. `getWebAppUserId(d
 
 ## Button & Modal Dispatch
 
-`index.js` routes button and modal-submit interactions by the first segment of `customId` (before `:`). To add component handling to a command, export `customIdPrefix` (a short string) and `handleComponent(interaction)` alongside `data` and `execute`. The `cc` prefix is reserved for the `/char create` wizard (`character.js`).
+`index.js` routes button and modal-submit interactions by the first segment of `customId` (before `:`). To add component handling to a command, export `customIdPrefix` (a short string) and `handleComponent(interaction)` alongside `data` and `execute`.
+
+| Prefix | File | Used for |
+|--------|------|----------|
+| `cc` | `character.js` | `/char create` wizard buttons and modals |
+| `dc` | `dndcommands.js` | `/dndcommands` Prev/Next pagination buttons |
 
 ## Setup: 5e Index
 
@@ -76,7 +82,7 @@ This fetches name lists from `https://www.dnd5eapi.co` and writes `data/dnd5e-in
 | Command | Visibility | Description |
 |---------|-----------|-------------|
 | `/link <username> [password]` | ephemeral | Links Discord account to web app user |
-| `/roll <expression>` | public | Rolls dice, shows all results + total |
+| `/roll <expression> [use_sd]` | public | Rolls one or more dice expressions; optional `use_sd` integer spends that many superiority dice from your active sheet and appends the updated count to the reply |
 | `/char create` | ephemeral | Step-by-step wizard to create a new character sheet (8 steps, all skippable) |
 | `/char select [number]` | ephemeral | List characters (no arg) or set active sheet by number |
 | `/char view` | public | Full character sheet embed (active sheet) |
@@ -94,7 +100,13 @@ This fetches name lists from `https://www.dnd5eapi.co` and writes `data/dnd5e-in
 | `/lookup spell <name>` | public | 5e spell reference (autocomplete) |
 | `/lookup feat <name>` | public | 5e feat reference (autocomplete) |
 | `/lookup feature <name>` | public | 5e class feature reference (autocomplete) |
-| `/dndcommands` | ephemeral | List all bot commands with one-line descriptions |
+| `/res rage use [amount]` | public | Spend rage uses (default 1) |
+| `/res rage recover [amount]` | public | Recover rage uses (default 1) |
+| `/res rage set <amount>` | public | Set rage uses to exact value |
+| `/res sd use [amount]` | public | Spend superiority dice (default 1) |
+| `/res sd recover [amount]` | public | Recover superiority dice (default 1) |
+| `/res sd set <amount>` | public | Set superiority dice to exact value |
+| `/dndcommands [all]` | ephemeral (default) | List all bot commands with one-line descriptions; add `all:True` to post publicly; paginated with Prev/Next buttons |
 
 ## Data Formats
 

@@ -30,23 +30,33 @@
       <div class="cs-box-title">Party Money</div>
       <div class="loot-money-grid">
         <div class="loot-money-field">
+          <button class="money-arrow" onclick="adjustMoney('pp', 1)">▲</button>
           <input type="number" id="money-pp" min="0" value="0" oninput="scheduleMoneySave()">
+          <button class="money-arrow" onclick="adjustMoney('pp', -1)">▼</button>
           <label>PP</label>
         </div>
         <div class="loot-money-field">
+          <button class="money-arrow" onclick="adjustMoney('gp', 1)">▲</button>
           <input type="number" id="money-gp" min="0" value="0" oninput="scheduleMoneySave()">
+          <button class="money-arrow" onclick="adjustMoney('gp', -1)">▼</button>
           <label>GP</label>
         </div>
         <div class="loot-money-field">
+          <button class="money-arrow" onclick="adjustMoney('ep', 1)">▲</button>
           <input type="number" id="money-ep" min="0" value="0" oninput="scheduleMoneySave()">
+          <button class="money-arrow" onclick="adjustMoney('ep', -1)">▼</button>
           <label>EP</label>
         </div>
         <div class="loot-money-field">
+          <button class="money-arrow" onclick="adjustMoney('sp', 1)">▲</button>
           <input type="number" id="money-sp" min="0" value="0" oninput="scheduleMoneySave()">
+          <button class="money-arrow" onclick="adjustMoney('sp', -1)">▼</button>
           <label>SP</label>
         </div>
         <div class="loot-money-field">
+          <button class="money-arrow" onclick="adjustMoney('cp', 1)">▲</button>
           <input type="number" id="money-cp" min="0" value="0" oninput="scheduleMoneySave()">
+          <button class="money-arrow" onclick="adjustMoney('cp', -1)">▼</button>
           <label>CP</label>
         </div>
       </div>

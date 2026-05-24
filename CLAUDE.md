@@ -27,6 +27,7 @@ See `docs/` for the authoritative project reference, organized by domain:
 | Auth behavior, session logic, or bootstrap grants in `db/schema.js` | `docs/auth.md` |
 | A frontend state variable added, removed, or renamed | `docs/frontend.md` for that JS file |
 | A frontend function added, removed, or renamed | Update the function index comment at the top of the JS file |
+| A Discord bot command added, removed, or renamed | Update the `/dndcommands` command list in `bot/commands/dndcommands.js` |
 
 **If a domain doc and the actual code disagree, trust the code and update the doc.**
 
